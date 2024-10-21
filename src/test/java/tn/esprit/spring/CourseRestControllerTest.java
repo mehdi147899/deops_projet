@@ -97,5 +97,23 @@ class CourseRestControllerTest {
                 .andExpect(jsonPath("$.price", is(100.0)))
                 .andExpect(jsonPath("$.timeSlot", is(2)));
     }
+    @Test
+    void testGetAllCoursesEmptyList() throws Exception {
+        // Mock the service method to return an empty list
+        when(courseServices.retrieveAllCourses()).thenReturn(List.of());
+
+        // Perform the GET request and verify the response
+        mockMvc.perform(get("/course/all"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(0))); // Check if the size of the list is 0
+    }
+    @Test
+    void testUpdateCourseWithInvalidData() throws Exception {
+        // Perform the PUT request with invalid data
+        mockMvc.perform(put("/course/update")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"numCourse\":1,\"level\":-1,\"typeCourse\":\"INVALID_TYPE\",\"support\":\"SNOWBOARD\",\"price\":150.0,\"timeSlot\":3}")) // Invalid level
+                .andExpect(status().isBadRequest()); // Expect a 400 Bad Request
+    }
 
 }
