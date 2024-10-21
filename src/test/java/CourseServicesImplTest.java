@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-public class CourseServicesImplTest {
+class CourseServicesImplTest { // Changed from public to package-private
 
     @InjectMocks
     private CourseServicesImpl courseServices;
@@ -28,13 +28,13 @@ public class CourseServicesImplTest {
     private Course course;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() { // Changed from public to package-private
         MockitoAnnotations.openMocks(this);
         course = new Course(1L, 3, TypeCourse.COLLECTIVE_CHILDREN, Support.SKI, 100.0f, 2, null);
     }
 
     @Test
-    public void testRetrieveAllCourses() {
+    void testRetrieveAllCourses() { // Changed from public to package-private
         List<Course> courses = new ArrayList<>();
         courses.add(course);
 
@@ -48,7 +48,7 @@ public class CourseServicesImplTest {
     }
 
     @Test
-    public void testAddCourse() {
+    void testAddCourse() { // Changed from public to package-private
         when(courseRepository.save(any(Course.class))).thenReturn(course);
 
         Course createdCourse = courseServices.addCourse(course);
@@ -58,7 +58,7 @@ public class CourseServicesImplTest {
     }
 
     @Test
-    public void testUpdateCourse() {
+    void testUpdateCourse() { // Changed from public to package-private
         when(courseRepository.save(any(Course.class))).thenReturn(course);
 
         Course updatedCourse = courseServices.updateCourse(course);
@@ -68,7 +68,7 @@ public class CourseServicesImplTest {
     }
 
     @Test
-    public void testRetrieveCourse() {
+    void testRetrieveCourse() { // Changed from public to package-private
         when(courseRepository.findById(1L)).thenReturn(Optional.of(course));
 
         Course retrievedCourse = courseServices.retrieveCourse(1L);
@@ -79,7 +79,7 @@ public class CourseServicesImplTest {
     }
 
     @Test
-    public void testRetrieveCourseNotFound() {
+    void testRetrieveCourseNotFound() { // Changed from public to package-private
         when(courseRepository.findById(1L)).thenReturn(Optional.empty());
 
         Course retrievedCourse = courseServices.retrieveCourse(1L);
