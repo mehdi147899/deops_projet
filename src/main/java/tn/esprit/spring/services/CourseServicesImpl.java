@@ -35,22 +35,22 @@ public class CourseServicesImpl implements ICourseServices {
     public Course addCourse(Course course) {
         // Check if the course is null
         if (course == null) {
-            throw new IllegalArgumentException("Course cannot be null");
+            throw new IllegalArgumentException(" cannot be null");
         }
 
         // Check if the course type is null
         if (course.getTypeCourse() == null) {
-            throw new IllegalArgumentException("Course type must not be null");
+            throw new IllegalArgumentException(" type must not be null");
         }
 
         // Check if the price is valid (greater than 0)
         if (course.getPrice() == null || course.getPrice() <= 0) {
-            throw new IllegalArgumentException("Course price must be greater than zero");
+            throw new IllegalArgumentException(" price must be greater than 0");
         }
 
         // Check if the level is valid
         if (course.getLevel() <= 0) {
-            throw new IllegalArgumentException("Course level must be greater than zero");
+            throw new IllegalArgumentException(" level must be greater than zero");
         }
 
         // Check if support is null
@@ -71,27 +71,27 @@ public class CourseServicesImpl implements ICourseServices {
     public Course updateCourse(Course course) {
         // Check if the course is null
         if (course == null) {
-            throw new IllegalArgumentException("Course cannot be null");
+            throw new IllegalArgumentException(" cannot be null");
         }
 
         // Check if the course exists in the repository
         if (!courseRepository.existsById(course.getNumCourse())) {
-            throw new IllegalArgumentException("Course not found");
+            throw new IllegalArgumentException(" not found");
         }
 
         // Check if the course type is null
         if (course.getTypeCourse() == null) {
-            throw new IllegalArgumentException("Course type must not be null");
+            throw new IllegalArgumentException(" type must not be null");
         }
 
         // Check if the price is valid (greater than 0)
         if (course.getPrice() == null || course.getPrice() <= 0) {
-            throw new IllegalArgumentException("Course price must be greater than zero");
+            throw new IllegalArgumentException(" price must be greater than 0");
         }
 
         // Check if the level is valid
         if (course.getLevel() <= 0) {
-            throw new IllegalArgumentException("Course level must be greater than zero");
+            throw new IllegalArgumentException(" level must be greater than 0");
         }
 
         // Check for support type
