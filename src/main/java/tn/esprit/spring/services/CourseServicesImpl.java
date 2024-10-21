@@ -1,4 +1,5 @@
 package tn.esprit.spring.services;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import lombok.AllArgsConstructor;
@@ -9,12 +10,12 @@ import tn.esprit.spring.repositories.ICourseRepository;
 
 import java.util.Collections;
 import java.util.List;
+
 @AllArgsConstructor
 @Service
 public class CourseServicesImpl implements ICourseServices {
 
     private final ICourseRepository courseRepository;
-
     private static final Logger logger = LoggerFactory.getLogger(CourseServicesImpl.class);
 
     @Override
@@ -27,50 +28,18 @@ public class CourseServicesImpl implements ICourseServices {
             return courses;
         } catch (DataAccessException e) {
             logger.error("Database error while retrieving courses", e);
-            // Return an empty list instead of throwing an exception
             return Collections.emptyList();
         }
     }
+
     @Override
     public Course addCourse(Course course) {
-        // Check if the course is null
-        if (course == null) {
-            throw new IllegalArgumentException(" cannot be null");
-        }
-
-        // Check if the course type is null
-        if (course.getTypeCourse() == null) {
-            throw new IllegalArgumentException(" type must not be null");
-        }
-
-        // Check if the price is valid (greater than 0)
-        if (course.getPrice() == null || course.getPrice() <= 0) {
-            throw new IllegalArgumentException(" price must be greater than 0");
-        }
-
-        // Check if the level is valid
-        if (course.getLevel() <= 0) {
-            throw new IllegalArgumentException(" level must be greater than zero");
-        }
-
-        // Check if support is null
-        if (course.getSupport() == null) {
-            throw new IllegalArgumentException("Support type must not be null");
-        }
-
-        // Check if timeSlot is valid
-        if (course.getTimeSlot() <= 0) {
-            throw new IllegalArgumentException("Time slot must be greater than zero");
-        }
-
-
-        // If all validations pass, save the course
+        validateCourse(course);
         return courseRepository.save(course);
     }
 
     @Override
     public Course updateCourse(Course course) {
-        // Check if the course is null
         if (course == null) {
             throw new IllegalArgumentException("Course cannot be null");
         }
@@ -80,34 +49,8 @@ public class CourseServicesImpl implements ICourseServices {
             throw new IllegalArgumentException("Course not found");
         }
 
-        // Check if the course type is null
-        if (course.getTypeCourse() == null) {
-            throw new IllegalArgumentException(" type must not be null");
-        }
-
-        // Check if the price is valid (greater than 0)
-        if (course.getPrice() == null || course.getPrice() <= 0) {
-            throw new IllegalArgumentException(" price must be greater than 0");
-        }
-
-        // Check if the level is valid
-        if (course.getLevel() <= 0) {
-            throw new IllegalArgumentException(" level must be greater than 0");
-        }
-
-        // Check for support type
-        if (course.getSupport() == null) {
-            throw new IllegalArgumentException("Support type must not be null");
-        }
-
-        // Check if timeSlot is valid
-        if (course.getTimeSlot() <= 0) {
-            throw new IllegalArgumentException("Time slot must be greater than zero");
-        }
-        if (!courseRepository.existsById(course.getNumCourse())) {
-            throw new IllegalArgumentException("Course not found");
-        }
-        // If all validations pass, save and return the course
+        // Validate the course object
+        validateCourse(course);
         return courseRepository.save(course);
     }
 
@@ -123,7 +66,6 @@ public class CourseServicesImpl implements ICourseServices {
         return courseRepository.findById(numCourse).orElse(null);
     }
 
-
     @Override
     public boolean exists(Long id) {
         if (id == null) {
@@ -132,4 +74,24 @@ public class CourseServicesImpl implements ICourseServices {
         return courseRepository.existsById(id);
     }
 
+    private void validateCourse(Course course) {
+        if (course == null) {
+            throw new IllegalArgumentException("Course cannot be null");
+        }
+        if (course.getTypeCourse() == null) {
+            throw new IllegalArgumentException("Course type must not be null");
+        }
+        if (course.getPrice() == null || course.getPrice() <= 0) {
+            throw new IllegalArgumentException("Price must be greater than 0");
+        }
+        if (course.getLevel() <= 0) {
+            throw new IllegalArgumentException("Level must be greater than zero");
+        }
+        if (course.getSupport() == null) {
+            throw new IllegalArgumentException("Support type must not be null");
+        }
+        if (course.getTimeSlot() <= 0) {
+            throw new IllegalArgumentException("Time slot must be greater than zero");
+        }
+    }
 }
