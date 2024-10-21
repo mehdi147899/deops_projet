@@ -31,26 +31,67 @@ public class CourseServicesImpl implements ICourseServices {
             return Collections.emptyList();
         }
     }
-
     @Override
     public Course addCourse(Course course) {
+        // Check if the course is null
         if (course == null) {
             throw new IllegalArgumentException("Course cannot be null");
         }
+
+        // Check if the course type is null
         if (course.getTypeCourse() == null) {
             throw new IllegalArgumentException("Course type must not be null");
         }
-        // Optionally, add more validation for other course properties here
+
+        // Check if the price is valid (greater than 0)
+        if (course.getPrice() == null || course.getPrice() <= 0) {
+            throw new IllegalArgumentException("Course price must be greater than zero");
+        }
+
+        // Check if the level is valid
+        if (course.getLevel() <= 0) {
+            throw new IllegalArgumentException("Course level must be greater than zero");
+        }
+
+        // Check if support is null
+        if (course.getSupport() == null) {
+            throw new IllegalArgumentException("Support type must not be null");
+        }
+
+        // Check if timeSlot is valid
+        if (course.getTimeSlot() <= 0) {
+            throw new IllegalArgumentException("Time slot must be greater than zero");
+        }
+
+        // If all validations pass, save the course
         return courseRepository.save(course);
     }
 
     @Override
     public Course updateCourse(Course course) {
+        // Check if the course is null
         if (course == null) {
             throw new IllegalArgumentException("Course cannot be null");
         }
+
+        // Check if the course exists in the repository
         if (!courseRepository.existsById(course.getNumCourse())) {
             throw new IllegalArgumentException("Course not found");
+        }
+
+        // Check if the course type is null
+        if (course.getTypeCourse() == null) {
+            throw new IllegalArgumentException("Course type must not be null");
+        }
+
+        // Check if the price is valid (greater than 0)
+        if (course.getPrice() == null || course.getPrice() <= 0) {
+            throw new IllegalArgumentException("Course price must be greater than zero");
+        }
+
+        // Check if the level is valid
+        if (course.getLevel() <= 0) {
+            throw new IllegalArgumentException("Course level must be greater than zero");
         }
 
         // Check for support type
@@ -58,9 +99,15 @@ public class CourseServicesImpl implements ICourseServices {
             throw new IllegalArgumentException("Support type must not be null");
         }
 
-        // Save and return the course
+        // Check if timeSlot is valid
+        if (course.getTimeSlot() <= 0) {
+            throw new IllegalArgumentException("Time slot must be greater than zero");
+        }
+
+        // If all validations pass, save and return the course
         return courseRepository.save(course);
     }
+
 
     @Override
     public Course retrieveCourse(Long numCourse) {

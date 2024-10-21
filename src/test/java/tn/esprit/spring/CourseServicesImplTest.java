@@ -9,15 +9,14 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.dao.DataAccessException;
 import tn.esprit.spring.entities.Course;
 import tn.esprit.spring.entities.Support;
 import tn.esprit.spring.entities.TypeCourse;
 import tn.esprit.spring.repositories.ICourseRepository;
 import tn.esprit.spring.services.CourseServicesImpl;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 class CourseServicesImplTest {
 
@@ -33,6 +32,44 @@ class CourseServicesImplTest {
     void setUp() {
         MockitoAnnotations.openMocks(this);
         course = new Course(1L, 3, TypeCourse.COLLECTIVE_CHILDREN, Support.SKI, 100.0f, 2, null);
+    }
+    @Test
+    void testAddCourseWithAllValidFields() {
+        Course validCourse = new Course(3L, 2, TypeCourse.COLLECTIVE_CHILDREN, Support.SNOWBOARD, 200.0f, 3, null);
+        when(courseRepository.save(any(Course.class))).thenReturn(validCourse);
+
+        Course createdCourse = courseServices.addCourse(validCourse);
+
+        assertEquals(validCourse.getNumCourse(), createdCourse.getNumCourse());
+        verify(courseRepository, times(1)).save(any(Course.class));
+    }
+
+    @Test
+    void testUpdateCourseWithNoChanges() {
+        when(courseRepository.existsById(course.getNumCourse())).thenReturn(true);
+        when(courseRepository.save(any(Course.class))).thenReturn(course);
+
+        Course updatedCourse = courseServices.updateCourse(course);
+
+        assertEquals(course.getNumCourse(), updatedCourse.getNumCourse());
+        verify(courseRepository, times(1)).save(any(Course.class));
+    }
+
+    @Test
+    void testAddCourseWithNullSupport() {
+        Course invalidCourse = new Course(4L, 3, TypeCourse.COLLECTIVE_CHILDREN, null, 100.0f, 2, null);
+
+        assertThrows(IllegalArgumentException.class, () -> courseServices.addCourse(invalidCourse));
+        verify(courseRepository, never()).save(any(Course.class));
+    }
+
+    @Test
+    void testUpdateCourseWithNegativeTimeSlot() {
+        Course invalidCourse = new Course(1L, 3, TypeCourse.COLLECTIVE_CHILDREN, Support.SKI, 100.0f, -1, null);
+        when(courseRepository.existsById(invalidCourse.getNumCourse())).thenReturn(true);
+
+        assertThrows(IllegalArgumentException.class, () -> courseServices.updateCourse(invalidCourse));
+        verify(courseRepository, never()).save(any(Course.class));
     }
 
     @Test
@@ -126,16 +163,6 @@ class CourseServicesImplTest {
         verify(courseRepository, times(1)).findAll();
     }
 
-    @Test
-    void testUpdateCourse() {
-        when(courseRepository.existsById(course.getNumCourse())).thenReturn(true);
-        when(courseRepository.save(any(Course.class))).thenReturn(course);
-
-        Course updatedCourse = courseServices.updateCourse(course);
-
-        assertEquals(course.getNumCourse(), updatedCourse.getNumCourse());
-        verify(courseRepository, times(1)).save(any(Course.class));
-    }
 
     @Test
     void testRetrieveCourse() {
@@ -210,7 +237,70 @@ class CourseServicesImplTest {
         assertThrows(RuntimeException.class, () -> courseServices.addCourse(course));
         verify(courseRepository, times(1)).save(any(Course.class));
     }
+    @Test
+    void testRetrieveAllCoursesDatabaseError() {
+        // Simulate a DataAccessException thrown by the repository
+        when(courseRepository.findAll()).thenThrow(new DataAccessException("Database error") {});
 
+        List<Course> retrievedCourses = courseServices.retrieveAllCourses();
+
+        assertNotNull(retrievedCourses); // Ensure the returned list is not null
+        assertTrue(retrievedCourses.isEmpty()); // Verify it returns an empty list
+        verify(courseRepository, times(1)).findAll(); // Verify that findAll was called
+    }
+    @Test
+    void testUpdateCourseWithValidSupportAndTypeCourse() {
+        Course validCourseToUpdate = new Course(1L, 3, TypeCourse.COLLECTIVE_CHILDREN, Support.SKI, 150.0f, 4, null);
+        when(courseRepository.existsById(validCourseToUpdate.getNumCourse())).thenReturn(true);
+        when(courseRepository.save(any(Course.class))).thenReturn(validCourseToUpdate);
+
+        Course updatedCourse = courseServices.updateCourse(validCourseToUpdate);
+
+        assertEquals(validCourseToUpdate.getNumCourse(), updatedCourse.getNumCourse());
+        assertEquals(validCourseToUpdate.getSupport(), updatedCourse.getSupport());
+        assertEquals(validCourseToUpdate.getTypeCourse(), updatedCourse.getTypeCourse());
+        verify(courseRepository, times(1)).save(any(Course.class));
+    }
+    @Test
+    void testAddCourseWithNegativePrice() {
+        Course invalidCourse = new Course(2L, 3, TypeCourse.COLLECTIVE_CHILDREN, Support.SKI, -100.0f, 2, null);
+
+        assertThrows(IllegalArgumentException.class, () -> courseServices.addCourse(invalidCourse));
+        verify(courseRepository, never()).save(any(Course.class));
+    }
+    @Test
+    void testUpdateCourseWithNegativePrice() {
+        Course invalidCourse = new Course(1L, 3, TypeCourse.COLLECTIVE_CHILDREN, Support.SKI, -50.0f, 2, null);
+        when(courseRepository.existsById(invalidCourse.getNumCourse())).thenReturn(true);
+
+        assertThrows(IllegalArgumentException.class, () -> courseServices.updateCourse(invalidCourse));
+        verify(courseRepository, never()).save(any(Course.class));
+    }
+    @Test
+    void testAddCourseWithInvalidCapacity() {
+        Course invalidCourse = new Course(2L, -1, TypeCourse.COLLECTIVE_CHILDREN, Support.SKI, 100.0f, -2, null);
+
+        assertThrows(IllegalArgumentException.class, () -> courseServices.addCourse(invalidCourse));
+        verify(courseRepository, never()).save(any(Course.class));
+    }
+    @Test
+    void testUpdateCourseWithInvalidCapacity() {
+        Course invalidCourse = new Course(1L, -1, TypeCourse.COLLECTIVE_CHILDREN, Support.SKI, 100.0f, -2, null);
+        when(courseRepository.existsById(invalidCourse.getNumCourse())).thenReturn(true);
+
+        assertThrows(IllegalArgumentException.class, () -> courseServices.updateCourse(invalidCourse));
+        verify(courseRepository, never()).save(any(Course.class));
+    }
+    @Test
+    void testRetrieveCourseWithValidId() {
+        when(courseRepository.findById(course.getNumCourse())).thenReturn(Optional.of(course));
+
+        Course retrievedCourse = courseServices.retrieveCourse(course.getNumCourse());
+
+        assertNotNull(retrievedCourse);
+        assertEquals(course.getNumCourse(), retrievedCourse.getNumCourse());
+        verify(courseRepository, times(1)).findById(course.getNumCourse());
+    }
     @Test
     void testRetrieveCourseNotFound() {
         when(courseRepository.findById(1L)).thenReturn(Optional.empty());
