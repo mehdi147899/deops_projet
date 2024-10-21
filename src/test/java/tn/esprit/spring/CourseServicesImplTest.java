@@ -38,17 +38,22 @@ class CourseServicesImplTest {
         course = new Course(1L, 3, TypeCourse.COLLECTIVE_CHILDREN, Support.SKI, 100.0f, 2, null);
     }
     @ParameterizedTest
-    @MethodSource("provideInvalidPriceCourses")
-    void testAddCourseWithInvalidPrice(Course invalidCourse) {
-        assertThrows(IllegalArgumentException.class, () -> courseServices.addCourse(invalidCourse));
+    @MethodSource("provideInvalidCourseParams")
+    void testAddCourseWithInvalidParameters(Course invalidCourse, String expectedMessage) {
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> courseServices.addCourse(invalidCourse));
+        assertEquals(expectedMessage, exception.getMessage());
         verify(courseRepository, never()).save(any(Course.class));
     }
 
-    private static Stream<Arguments> provideInvalidPriceCourses() {
+    private static Stream<Arguments> provideInvalidCourseParams() {
         return Stream.of(
-                Arguments.of(new Course(1L, 1, TypeCourse.COLLECTIVE_ADULT, Support.SKI, -10.0f, 2, null)), // Negative price
-                Arguments.of(new Course(2L, 1, TypeCourse.COLLECTIVE_ADULT, Support.SKI, 0.0f, 2, null)), // Zero price
-                Arguments.of(new Course(3L, 1, TypeCourse.COLLECTIVE_ADULT, Support.SKI, null, 2, null)) // Null price
+                Arguments.of(new Course(1L, 1, null, Support.SKI, 100.0f, 2, null), "Course type must not be null"),
+                Arguments.of(new Course(2L, 1, TypeCourse.COLLECTIVE_ADULT, Support.SKI, -10.0f, 2, null), "Price must be greater than 0"),
+                Arguments.of(new Course(3L, 1, TypeCourse.COLLECTIVE_ADULT, Support.SKI, 0.0f, 2, null), "Price must be greater than 0"),
+                Arguments.of(new Course(4L, 1, TypeCourse.COLLECTIVE_ADULT, Support.SKI, null, 2, null), "Price must be greater than 0"),
+                Arguments.of(new Course(5L, 0, TypeCourse.COLLECTIVE_ADULT, Support.SKI, 100.0f, 2, null), "Level must be greater than zero"),
+                Arguments.of(new Course(6L, 1, TypeCourse.COLLECTIVE_ADULT, null, 100.0f, 2, null), "Support type must not be null"),
+                Arguments.of(new Course(7L, 1, TypeCourse.COLLECTIVE_ADULT, Support.SKI, 100.0f, 0, null), "Time slot must be greater than zero")
         );
     }
     @Test
