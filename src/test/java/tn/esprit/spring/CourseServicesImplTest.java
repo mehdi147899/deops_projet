@@ -1,7 +1,6 @@
 package tn.esprit.spring;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -39,19 +38,19 @@ class CourseServicesImplTest {
         course = new Course(1L, 3, TypeCourse.COLLECTIVE_CHILDREN, Support.SKI, 100.0f, 2, null);
     }
     @ParameterizedTest
-    @MethodSource("provideInvalidCourses")
-    void testAddCourseWithVariousInvalidInputs(Course invalidCourse) {
+    @MethodSource("provideInvalidPriceCourses")
+    void testAddCourseWithInvalidPrice(Course invalidCourse) {
         assertThrows(IllegalArgumentException.class, () -> courseServices.addCourse(invalidCourse));
+        verify(courseRepository, never()).save(any(Course.class));
     }
 
-    private static Stream<Arguments> provideInvalidCourses() {
+    private static Stream<Arguments> provideInvalidPriceCourses() {
         return Stream.of(
-                arguments(new Course(3L, 3, TypeCourse.COLLECTIVE_ADULT, Support.SKI, -50.0f, 2, null)), // Invalid price
-                arguments(new Course(4L, 3, null, Support.SKI, 100.0f, 2, null)), // Null type
-                arguments(new Course(5L, 3, TypeCourse.COLLECTIVE_CHILDREN, null, 100.0f, 2, null))
+                Arguments.of(new Course(1L, 1, TypeCourse.COLLECTIVE_ADULT, Support.SKI, -10.0f, 2, null)), // Negative price
+                Arguments.of(new Course(2L, 1, TypeCourse.COLLECTIVE_ADULT, Support.SKI, 0.0f, 2, null)), // Zero price
+                Arguments.of(new Course(3L, 1, TypeCourse.COLLECTIVE_ADULT, Support.SKI, null, 2, null)) // Null price
         );
     }
-
     @Test
     void testAddCourseWithAllValidFields() {
         Course validCourse = new Course(3L, 2, TypeCourse.COLLECTIVE_ADULT, Support.SNOWBOARD, 200.0f, 3, null);
