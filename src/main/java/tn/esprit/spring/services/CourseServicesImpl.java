@@ -32,5 +32,9 @@ public class CourseServicesImpl implements  ICourseServices{
         return courseRepository.findById(numCourse).orElse(null);
     }
 
+    @Override
+    public boolean exists(Long id) {
+        return courseRepository.existsById(id); // Use the existsById method provided by JPA
+    }
 
 }
