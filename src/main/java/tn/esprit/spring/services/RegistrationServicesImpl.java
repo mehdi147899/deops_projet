@@ -67,7 +67,7 @@ public class RegistrationServicesImpl implements  IRegistrationServices{
                         log.info("Course successfully added !");
                         return assignRegistration(registration, skier, course);
                     } else {
-                        log.info("Full Course ! Please choose another week to register !");
+                        log.info("Full Corse ! Please choose another week to register !");
                         return null;
                     }
                 }
