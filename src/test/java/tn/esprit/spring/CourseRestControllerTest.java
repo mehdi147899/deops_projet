@@ -32,7 +32,13 @@ class CourseRestControllerTest {
     @Test
     void testAddCourse() throws Exception {
         // Create a sample course object
-        Course course = new Course(1L, 1, TypeCourse.COLLECTIVE_ADULT, Support.SKI, 100.0f, 2, null);
+        Course course = new Course();
+        course.setNumCourse(1L);
+        course.setLevel(1);
+        course.setTypeCourse(TypeCourse.COLLECTIVE_ADULT);
+        course.setSupport(Support.SKI);
+        course.setPrice(100.0f);
+        course.setTimeSlot(2);
 
         // Define behavior for the mocked service
         when(courseServices.addCourse(any(Course.class))).thenReturn(course);
@@ -48,8 +54,21 @@ class CourseRestControllerTest {
     @Test
     void testGetAllCourses() throws Exception {
         // Create sample Course objects
-        Course course1 = new Course(1L, 1, TypeCourse.COLLECTIVE_ADULT, Support.SKI, 100.0f, 2, null);
-        Course course2 = new Course(2L, 2, TypeCourse.INDIVIDUAL, Support.SNOWBOARD, 150.0f, 3, null);
+        Course course1 = new Course();
+        course1.setNumCourse(1L);
+        course1.setLevel(1);
+        course1.setTypeCourse(TypeCourse.COLLECTIVE_ADULT);
+        course1.setSupport(Support.SKI);
+        course1.setPrice(100.0f);
+        course1.setTimeSlot(2);
+
+        Course course2 = new Course();
+        course2.setNumCourse(2L);
+        course2.setLevel(2);
+        course2.setTypeCourse(TypeCourse.INDIVIDUAL);
+        course2.setSupport(Support.SNOWBOARD);
+        course2.setPrice(150.0f);
+        course2.setTimeSlot(3);
 
         // Mock the service method to return the list of courses
         when(courseServices.retrieveAllCourses()).thenReturn(List.of(course1, course2));
@@ -64,7 +83,13 @@ class CourseRestControllerTest {
     @Test
     void testUpdateCourse() throws Exception {
         // Define the expected updated course
-        Course updatedCourse = new Course(1L, 1, TypeCourse.INDIVIDUAL, Support.SNOWBOARD, 150.0f, 3, null);
+        Course updatedCourse = new Course();
+        updatedCourse.setNumCourse(1L);
+        updatedCourse.setLevel(1);
+        updatedCourse.setTypeCourse(TypeCourse.INDIVIDUAL);
+        updatedCourse.setSupport(Support.SNOWBOARD);
+        updatedCourse.setPrice(150.0f);
+        updatedCourse.setTimeSlot(3);
 
         // Mock the service method to return the updated course
         when(courseServices.updateCourse(any(Course.class))).thenReturn(updatedCourse);
@@ -82,7 +107,13 @@ class CourseRestControllerTest {
     @Test
     void testGetById() throws Exception {
         // Define a sample Course object to return
-        Course course = new Course(1L, 1, TypeCourse.COLLECTIVE_ADULT, Support.SKI, 100.0f, 2, null);
+        Course course = new Course();
+        course.setNumCourse(1L);
+        course.setLevel(1);
+        course.setTypeCourse(TypeCourse.COLLECTIVE_ADULT);
+        course.setSupport(Support.SKI);
+        course.setPrice(100.0f);
+        course.setTimeSlot(2);
 
         // Mock the service method to return the course for the given ID
         when(courseServices.retrieveCourse(1L)).thenReturn(course);
