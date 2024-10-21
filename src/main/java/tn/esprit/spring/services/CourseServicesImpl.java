@@ -63,6 +63,7 @@ public class CourseServicesImpl implements ICourseServices {
             throw new IllegalArgumentException("Time slot must be greater than zero");
         }
 
+
         // If all validations pass, save the course
         return courseRepository.save(course);
     }
@@ -71,12 +72,12 @@ public class CourseServicesImpl implements ICourseServices {
     public Course updateCourse(Course course) {
         // Check if the course is null
         if (course == null) {
-            throw new IllegalArgumentException(" cannot be null");
+            throw new IllegalArgumentException("Course cannot be null");
         }
 
         // Check if the course exists in the repository
         if (!courseRepository.existsById(course.getNumCourse())) {
-            throw new IllegalArgumentException(" not found");
+            throw new IllegalArgumentException("Course not found");
         }
 
         // Check if the course type is null
@@ -103,7 +104,9 @@ public class CourseServicesImpl implements ICourseServices {
         if (course.getTimeSlot() <= 0) {
             throw new IllegalArgumentException("Time slot must be greater than zero");
         }
-
+        if (!courseRepository.existsById(course.getNumCourse())) {
+            throw new IllegalArgumentException("Course not found");
+        }
         // If all validations pass, save and return the course
         return courseRepository.save(course);
     }
