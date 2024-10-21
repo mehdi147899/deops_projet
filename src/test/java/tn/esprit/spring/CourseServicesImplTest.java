@@ -1,11 +1,15 @@
 package tn.esprit.spring;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -17,6 +21,7 @@ import tn.esprit.spring.repositories.ICourseRepository;
 import tn.esprit.spring.services.CourseServicesImpl;
 
 import java.util.*;
+import java.util.stream.Stream;
 
 class CourseServicesImplTest {
 
@@ -33,6 +38,20 @@ class CourseServicesImplTest {
         MockitoAnnotations.openMocks(this);
         course = new Course(1L, 3, TypeCourse.COLLECTIVE_CHILDREN, Support.SKI, 100.0f, 2, null);
     }
+    @ParameterizedTest
+    @MethodSource("provideInvalidCourses")
+    void testAddCourseWithVariousInvalidInputs(Course invalidCourse) {
+        assertThrows(IllegalArgumentException.class, () -> courseServices.addCourse(invalidCourse));
+    }
+
+    private static Stream<Arguments> provideInvalidCourses() {
+        return Stream.of(
+                arguments(new Course(3L, 3, TypeCourse.COLLECTIVE_ADULT, Support.SKI, -50.0f, 2, null)), // Invalid price
+                arguments(new Course(4L, 3, null, Support.SKI, 100.0f, 2, null)), // Null type
+                arguments(new Course(5L, 3, TypeCourse.COLLECTIVE_CHILDREN, null, 100.0f, 2, null))
+        );
+    }
+
     @Test
     void testAddCourseWithAllValidFields() {
         Course validCourse = new Course(3L, 2, TypeCourse.COLLECTIVE_ADULT, Support.SNOWBOARD, 200.0f, 3, null);
@@ -43,6 +62,17 @@ class CourseServicesImplTest {
         assertEquals(validCourse.getNumCourse(), createdCourse.getNumCourse());
         verify(courseRepository, times(1)).save(any(Course.class));
     }
+    @Test
+    void testValidateCourseNullCourse() {
+        assertThrows(IllegalArgumentException.class, () -> courseServices.addCourse(null));
+    }
+
+    @Test
+    void testValidateCourseNullType() {
+        Course invalidCourse = new Course(2L, 3, null, Support.SKI, 100.0f, 2, null);
+        assertThrows(IllegalArgumentException.class, () -> courseServices.addCourse(invalidCourse));
+    }
+
 
     @Test
     void testUpdateCourseWithNoChanges() {
