@@ -23,7 +23,10 @@ public class CourseServicesImpl implements ICourseServices {
         if (course == null) {
             throw new IllegalArgumentException("Course cannot be null");
         }
-        // Optionally, add more validation for course properties here
+        if (course.getTypeCourse() == null) {
+            throw new IllegalArgumentException("Course type must not be null");
+        }
+        // Optionally, add more validation for other course properties here
         return courseRepository.save(course);
     }
 
@@ -33,11 +36,17 @@ public class CourseServicesImpl implements ICourseServices {
             throw new IllegalArgumentException("Course cannot be null");
         }
         if (!courseRepository.existsById(course.getNumCourse())) {
-            throw new IllegalArgumentException("Course not found"); // Updated message
+            throw new IllegalArgumentException("Course not found");
         }
+
+        // Check for support type
+        if (course.getSupport() == null) {
+            throw new IllegalArgumentException("Support type must not be null");
+        }
+
+        // Save and return the course
         return courseRepository.save(course);
     }
-
 
     @Override
     public Course retrieveCourse(Long numCourse) {
