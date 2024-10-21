@@ -58,6 +58,78 @@ class CourseServicesImplTest {
         assertEquals(course.getNumCourse(), createdCourse.getNumCourse());
         verify(courseRepository, times(1)).save(any(Course.class));
     }
+    @Test
+    void testRetrieveAllCoursesEmpty() {
+        when(courseRepository.findAll()).thenReturn(new ArrayList<>()); // Mock an empty list
+
+        List<Course> retrievedCourses = courseServices.retrieveAllCourses();
+
+        assertNotNull(retrievedCourses);
+        assertEquals(0, retrievedCourses.size()); // Expecting empty list
+        verify(courseRepository, times(1)).findAll();
+    }
+    @Test
+    void testAddDuplicateCourse() {
+        when(courseRepository.save(any(Course.class))).thenThrow(new IllegalArgumentException("Course already exists"));
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            courseServices.addCourse(course);
+        });
+
+        verify(courseRepository, times(1)).save(any(Course.class));
+    }
+    @Test
+    void testUpdateCourseWithNull() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            courseServices.updateCourse(null);
+        });
+        verify(courseRepository, never()).save(any(Course.class));
+    }
+    @Test
+    void testUpdateCourseNotFound() {
+        when(courseRepository.existsById(course.getNumCourse())).thenReturn(false);
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            courseServices.updateCourse(course);
+        });
+
+        verify(courseRepository, times(1)).existsById(course.getNumCourse());
+    }
+    @Test
+    void testRetrieveAllCoursesThrowsException() {
+        when(courseRepository.findAll()).thenThrow(new RuntimeException("Database error"));
+
+        assertThrows(RuntimeException.class, () -> {
+            courseServices.retrieveAllCourses();
+        });
+
+        verify(courseRepository, times(1)).findAll();
+    }
+    @Test
+    void testRetrieveCourseWithNullId() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            courseServices.retrieveCourse(null);
+        });
+        verify(courseRepository, never()).findById(anyLong());
+    }
+
+    @Test
+    void testRetrieveAllCoursesMultiple() {
+        Course anotherCourse = new Course(2L, 4, TypeCourse.COLLECTIVE_CHILDREN, Support.SNOWBOARD, 120.0f, 3, null);
+        List<Course> courses = new ArrayList<>();
+        courses.add(course);
+        courses.add(anotherCourse);
+
+        when(courseRepository.findAll()).thenReturn(courses);
+
+        List<Course> retrievedCourses = courseServices.retrieveAllCourses();
+
+        assertNotNull(retrievedCourses);
+        assertEquals(2, retrievedCourses.size());
+        assertTrue(retrievedCourses.stream().anyMatch(c -> c.getNumCourse().equals(course.getNumCourse())));
+        assertTrue(retrievedCourses.stream().anyMatch(c -> c.getNumCourse().equals(anotherCourse.getNumCourse())));
+        verify(courseRepository, times(1)).findAll();
+    }
 
     @Test
     void testUpdateCourse() {
