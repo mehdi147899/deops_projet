@@ -174,9 +174,37 @@ class CourseServicesImplTest {
         assertNull(retrievedCourse);
         verify(courseRepository, times(1)).findById(99L);
     }
+    @Test
+    void testAddCourseWithMissingRequiredField() {
+        Course invalidCourse = new Course(2L, 3, null, null, 100.0f, 2, null); // No type and support
+
+        assertThrows(IllegalArgumentException.class, () -> courseServices.addCourse(invalidCourse));
+        verify(courseRepository, never()).save(any(Course.class));
+    }
 
     @Test
-    void testAddCourseWhenRepositoryFails() {
+    void testUpdateCourseWithMissingRequiredField() {
+        Course invalidCourse = new Course(1L, 3, null, null, 100.0f, 2, null); // No type and support
+        when(courseRepository.existsById(invalidCourse.getNumCourse())).thenReturn(true);
+
+        assertThrows(IllegalArgumentException.class, () -> courseServices.updateCourse(invalidCourse));
+        verify(courseRepository, never()).save(any(Course.class));
+    }
+
+    @Test
+    void testRetrieveCourseWithInvalidId() {
+        assertThrows(IllegalArgumentException.class, () -> courseServices.retrieveCourse(-1L)); // Invalid ID
+        verify(courseRepository, never()).findById(anyLong());
+    }
+
+    @Test
+    void testExistsWithNullId() {
+        assertThrows(IllegalArgumentException.class, () -> courseServices.exists(null));
+        verify(courseRepository, never()).existsById(anyLong());
+    }
+
+    @Test
+    void testAddCourseWithDatabaseError() {
         when(courseRepository.save(any(Course.class))).thenThrow(new RuntimeException("Database error"));
 
         assertThrows(RuntimeException.class, () -> courseServices.addCourse(course));

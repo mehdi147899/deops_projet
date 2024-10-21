@@ -1,21 +1,35 @@
 package tn.esprit.spring.services;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import lombok.AllArgsConstructor;
+import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import tn.esprit.spring.entities.Course;
 import tn.esprit.spring.repositories.ICourseRepository;
 
+import java.util.Collections;
 import java.util.List;
-
 @AllArgsConstructor
 @Service
 public class CourseServicesImpl implements ICourseServices {
 
     private final ICourseRepository courseRepository;
 
+    private static final Logger logger = LoggerFactory.getLogger(CourseServicesImpl.class);
+
     @Override
     public List<Course> retrieveAllCourses() {
-        return courseRepository.findAll();
+        try {
+            List<Course> courses = courseRepository.findAll();
+            if (courses.isEmpty()) {
+                logger.warn("No courses available");
+            }
+            return courses;
+        } catch (DataAccessException e) {
+            logger.error("Database error while retrieving courses", e);
+            // Return an empty list instead of throwing an exception
+            return Collections.emptyList();
+        }
     }
 
     @Override
@@ -53,11 +67,19 @@ public class CourseServicesImpl implements ICourseServices {
         if (numCourse == null) {
             throw new IllegalArgumentException("Course ID cannot be null");
         }
+        if (numCourse < 0) {
+            throw new IllegalArgumentException("Course ID must not be negative");
+        }
         return courseRepository.findById(numCourse).orElse(null);
     }
 
+
     @Override
     public boolean exists(Long id) {
-        return courseRepository.existsById(id); // Use the existsById method provided by JPA
+        if (id == null) {
+            throw new IllegalArgumentException("Course ID cannot be null");
+        }
+        return courseRepository.existsById(id);
     }
+
 }
