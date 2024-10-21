@@ -8,7 +8,7 @@ import tn.esprit.spring.repositories.ICourseRepository;
 import tn.esprit.spring.repositories.IRegistrationRepository;
 import tn.esprit.spring.repositories.ISkierRepository;
 
-import javax.transaction.Transactional;
+import jakarta.transaction.*;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.List;
