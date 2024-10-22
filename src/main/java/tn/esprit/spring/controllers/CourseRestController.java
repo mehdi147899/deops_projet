@@ -2,6 +2,7 @@ package tn.esprit.spring.controllers;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,13 +21,15 @@ import java.util.Map;
 public class CourseRestController {
 
     private final ICourseServices courseServices;
-
     @Operation(description = "Add Course")
     @PostMapping("/add")
-    public Course addCourse(@RequestBody Course course) {
-        return courseServices.addCourse(course);
+    public ResponseEntity<Course> addCourse(@RequestBody @Valid Course course) {
+        if (course.getNumCourse() == null) { // Add validation check
+            return ResponseEntity.badRequest().body(null);
+        }
+        Course addedCourse = courseServices.addCourse(course);
+        return ResponseEntity.status(HttpStatus.CREATED).body(addedCourse);
     }
-
     @Operation(description = "Retrieve all Courses")
     @GetMapping("/all")
     public List<Course> getAllCourses() {
@@ -35,9 +38,16 @@ public class CourseRestController {
 
     @Operation(description = "Update Course")
     @PutMapping("/update")
-    public Course updateCourse(@RequestBody Course course) {
-        return courseServices.updateCourse(course);
+    public ResponseEntity<Course> updateCourse(@RequestBody Course course) {
+        try {
+            Course updatedCourse = courseServices.updateCourse(course);
+            return ResponseEntity.ok(updatedCourse);
+        } catch (RuntimeException e) {
+            // Return 404 Not Found with error message
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
     }
+
 
     @Operation(description = "Retrieve Course by Id")
     @GetMapping("/get/{id}")
