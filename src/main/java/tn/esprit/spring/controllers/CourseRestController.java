@@ -23,13 +23,16 @@ public class CourseRestController {
     private final ICourseServices courseServices;
     @Operation(description = "Add Course")
     @PostMapping("/add")
-    public ResponseEntity<Course> addCourse(@RequestBody @Valid Course course) {
+    public ResponseEntity<Object> addCourse(@RequestBody @Valid Course course) {
         if (course.getNumCourse() == null) { // Add validation check
-            return ResponseEntity.badRequest().body(null);
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Course number cannot be null");
+            return ResponseEntity.badRequest().body(errorResponse);
         }
         Course addedCourse = courseServices.addCourse(course);
         return ResponseEntity.status(HttpStatus.CREATED).body(addedCourse);
     }
+
     @Operation(description = "Retrieve all Courses")
     @GetMapping("/all")
     public List<Course> getAllCourses() {

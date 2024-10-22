@@ -39,6 +39,18 @@ class CourseRestControllerTest {
                         .content("{\"numCourse\":999,\"level\":1,\"typeCourse\":\"INDIVIDUAL\",\"support\":\"SNOWBOARD\",\"price\":150.0,\"timeSlot\":3}"))
                 .andExpect(status().isNotFound()); // Expect a 404 Not Found
     }
+    @Test
+    void testAddCourseWithNullNumCourse() throws Exception {
+        // Create a Course object with null numCourse
+        String courseJson = "{\"numCourse\":null,\"level\":1,\"typeCourse\":\"COLLECTIVE_ADULT\",\"support\":\"SKI\",\"price\":100.0,\"timeSlot\":2}";
+
+        // Perform the POST request with the invalid course data
+        mockMvc.perform(post("/course/add")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(courseJson))
+                .andExpect(status().isBadRequest()) // Expecting a 400 Bad Request status
+                .andExpect(jsonPath("$.error", is("Course number cannot be null"))); // Now this should match the actual error message
+    }
 
     @Test
     void testGetByIdNotFound() throws Exception {
