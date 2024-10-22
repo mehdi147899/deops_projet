@@ -3,11 +3,15 @@ package tn.esprit.spring.controllers;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import tn.esprit.spring.entities.Course;
 import tn.esprit.spring.services.ICourseServices;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Tag(name = "\uD83D\uDCDA Course Management")
 @RestController
@@ -37,8 +41,15 @@ public class CourseRestController {
 
     @Operation(description = "Retrieve Course by Id")
     @GetMapping("/get/{id}")
-    public Course getById(@PathVariable("id") Long numCourse) {
-        return courseServices.retrieveCourse(numCourse);
+    public ResponseEntity<Object> getById(@PathVariable("id") Long numCourse) {
+        try {
+            Course course = courseServices.retrieveCourse(numCourse);
+            return ResponseEntity.ok(course);
+        } catch (RuntimeException e) {
+            // Return 404 Not Found with error message as a Map
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Course not found");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+        }
     }
-
 }
