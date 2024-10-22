@@ -28,6 +28,29 @@ class CourseRestControllerTest {
 
     @MockBean // Use MockBean to create a mock instance of ICourseServices
     private ICourseServices courseServices;
+    @Test
+    void testUpdateCourseNotFound() throws Exception {
+        // Mock the service to throw an exception for a non-existent course
+        when(courseServices.updateCourse(any(Course.class))).thenThrow(new RuntimeException("Course not found"));
+
+        // Perform the PUT request
+        mockMvc.perform(put("/course/update")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"numCourse\":999,\"level\":1,\"typeCourse\":\"INDIVIDUAL\",\"support\":\"SNOWBOARD\",\"price\":150.0,\"timeSlot\":3}"))
+                .andExpect(status().isNotFound()); // Expect a 404 Not Found
+    }
+
+    @Test
+    void testGetByIdNotFound() throws Exception {
+        // Mock the service to throw an exception for a non-existent course
+        when(courseServices.retrieveCourse(999L)).thenThrow(new RuntimeException("Course not found"));
+
+        // Perform the GET request
+        mockMvc.perform(get("/course/get/999")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.error", is("Course not found"))); // Verify error message
+    }
 
     @Test
     void testAddCourse() throws Exception {
