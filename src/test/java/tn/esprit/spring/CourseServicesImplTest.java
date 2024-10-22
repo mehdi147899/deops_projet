@@ -57,6 +57,13 @@ class CourseServicesImplTest {
         );
     }
     @Test
+    void testUpdateCourseWithNullNumCourse() {
+        Course invalidCourse = new Course(null, 3, TypeCourse.COLLECTIVE_CHILDREN, Support.SKI, 100.0f, 2, null);
+        assertThrows(IllegalArgumentException.class, () -> courseServices.updateCourse(invalidCourse));
+        verify(courseRepository, never()).save(any(Course.class));
+    }
+
+    @Test
     void testAddCourseWithAllValidFields() {
         Course validCourse = new Course(3L, 2, TypeCourse.COLLECTIVE_ADULT, Support.SNOWBOARD, 200.0f, 3, null);
         when(courseRepository.save(any(Course.class))).thenReturn(validCourse);
