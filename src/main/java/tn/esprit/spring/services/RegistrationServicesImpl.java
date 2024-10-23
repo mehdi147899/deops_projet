@@ -8,7 +8,7 @@ import tn.esprit.spring.repositories.ICourseRepository;
 import tn.esprit.spring.repositories.IRegistrationRepository;
 import tn.esprit.spring.repositories.ISkierRepository;
 
-import javax.transaction.Transactional;
+import jakarta.transaction.*;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.List;
@@ -67,7 +67,7 @@ public class RegistrationServicesImpl implements  IRegistrationServices{
                         log.info("Course successfully added !");
                         return assignRegistration(registration, skier, course);
                     } else {
-                        log.info("Full Course ! Please choose another week to register !");
+                        log.info("Full Corse ! Please choose another week to register !");
                         return null;
                     }
                 }

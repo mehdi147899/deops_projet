@@ -1,27 +1,23 @@
 package tn.esprit.spring.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
+
 import java.io.Serializable;
 import java.util.Set;
 
-import javax.persistence.*;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.experimental.FieldDefaults;
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@FieldDefaults(level=AccessLevel.PRIVATE)
+@FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
 public class Course implements Serializable {
 
 	@Id
-	@GeneratedValue(strategy=GenerationType.IDENTITY)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	Long numCourse;
 	int level;
 	@Enumerated(EnumType.STRING)
@@ -32,7 +28,6 @@ public class Course implements Serializable {
 	int timeSlot;
 
 	@JsonIgnore
-	@OneToMany(mappedBy= "course")
-	Set<Registration> registrations;
-
+	@OneToMany(mappedBy = "course")
+	transient Set<Registration> registrations; // Marked as transient // No need to change this if Registration is Serializable
 }
