@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  mysqldb:
+    image: mysql:5.7
+    container_name: mysqldb
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: your_db_name
+      MYSQL_USER: your_user
+      MYSQL_PASSWORD: your_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+
+  app:
+    image: dockghass/tp-ski:1.0.0
+    container_name: tp-ski-app
+    restart: on-failure
+    ports:
+      - "8089:8089"
+    environment:
+      SPRING_DATASOURCE_URL: "jdbc:mysql://mysqldb:3306/your_db_name"
+      SPRING_DATASOURCE_USERNAME: "your_user"
+      SPRING_DATASOURCE_PASSWORD: "your_password"
+      SPRING_JPA_HIBERNATE_DDL_AUTO: "update"
+    depends_on:
+      - mysqldb
+
+volumes:
+  db_data:
