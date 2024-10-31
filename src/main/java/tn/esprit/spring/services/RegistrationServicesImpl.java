@@ -2,14 +2,13 @@ package tn.esprit.spring.services;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import tn.esprit.spring.entities.*;
 import tn.esprit.spring.repositories.ICourseRepository;
 import tn.esprit.spring.repositories.IRegistrationRepository;
 import tn.esprit.spring.repositories.ISkierRepository;
 
-import jakarta.transaction.Transactional;
+import jakarta.transaction.*;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.List;
@@ -24,135 +23,82 @@ public class RegistrationServicesImpl implements IRegistrationServices {
     private ISkierRepository skierRepository;
     private ICourseRepository courseRepository;
 
-    @Override
-    public Registration addRegistrationAndAssignToSkier(@Nullable Registration registration, @Nullable Long numSkier) {
-        if (registration == null || numSkier == null) {
-            log.warn("Registration or Skier ID is null");
-            return null;
-        }
-
-        Optional<Skier> skierOpt = skierRepository.findById(numSkier);
-        if (!skierOpt.isPresent()) {
-            log.warn("Skier not found for ID: " + numSkier);
-            return null;
-        }
-
-        registration.setSkier(skierOpt.get());
-        return registrationRepository.save(registration);
-    }
-
-    @Override
-    public Registration assignRegistrationToCourse(@Nullable Long numRegistration, @Nullable Long numCourse) {
-        if (numRegistration == null || numCourse == null) {
-            log.warn("Registration ID or Course ID is null");
-            return null;
-        }
-
-        Optional<Registration> registrationOpt = registrationRepository.findById(numRegistration);
-        Optional<Course> courseOpt = courseRepository.findById(numCourse);
-
-        if (!registrationOpt.isPresent() || !courseOpt.isPresent()) {
-            log.warn("Registration or Course not found");
-            return null;
-        }
-
-        Registration registration = registrationOpt.get();
-        registration.setCourse(courseOpt.get());
-        return registrationRepository.save(registration);
-    }
-
     @Transactional
     @Override
-    public Registration addRegistrationAndAssignToSkierAndCourse(@Nullable Registration registration, @Nullable Long numSkieur, @Nullable Long numCours) {
-        if (registration == null || numSkieur == null || numCours == null) {
-            log.warn("Invalid input: null value for registration, skier ID, or course ID");
-            return null;
-        }
-
+    public Registration addRegistrationAndAssignToSkierAndCourse(Registration registration, Long numSkieur, Long numCours) {
         Optional<Skier> skierOpt = skierRepository.findById(numSkieur);
         Optional<Course> courseOpt = courseRepository.findById(numCours);
 
-        if (!skierOpt.isPresent() || !courseOpt.isPresent()) {
-            log.warn("Skier or Course not found");
+        if (skierOpt.isEmpty() || courseOpt.isEmpty()) {
             return null;
         }
 
         Skier skier = skierOpt.get();
         Course course = courseOpt.get();
 
-        if (isDuplicateRegistration(registration, skier, course)) {
+        if (isAlreadyRegistered(registration, skier, course)) {
             return null;
         }
 
         int ageSkieur = calculateSkierAge(skier);
-        log.info("Age " + ageSkieur);
-
-        if (isEligibleForCourseType(course, ageSkieur, registration)) {
-            return assignRegistration(registration, skier, course);
-        }
-
-        return registration;
+        return processCourseRegistration(registration, skier, course, ageSkieur);
     }
 
-    private boolean isDuplicateRegistration(Registration registration, Skier skier, Course course) {
-        if (registrationRepository.countDistinctByNumWeekAndSkier_NumSkierAndCourse_NumCourse(
-                registration.getNumWeek(), skier.getNumSkier(), course.getNumCourse()) >= 1) {
-            log.info("Already registered for this course in week: " + registration.getNumWeek());
+    private boolean isAlreadyRegistered(Registration registration, Skier skier, Course course) {
+        if (registrationRepository.countDistinctByNumWeekAndSkier_NumSkierAndCourse_NumCourse(registration.getNumWeek(), skier.getNumSkier(), course.getNumCourse()) >= 1) {
+            log.info("Sorry, you're already registered for this course in week: " + registration.getNumWeek());
             return true;
         }
         return false;
     }
 
-    private int calculateSkierAge(@Nullable Skier skier) {
-        if (skier == null || skier.getDateOfBirth() == null) {
-            log.warn("Skier or Skier's date of birth is null");
-            return 0;
-        }
+    private int calculateSkierAge(Skier skier) {
         return Period.between(skier.getDateOfBirth(), LocalDate.now()).getYears();
     }
 
-    private boolean isEligibleForCourseType(Course course, int ageSkieur, Registration registration) {
+    private Registration processCourseRegistration(Registration registration, Skier skier, Course course, int ageSkieur) {
         switch (course.getTypeCourse()) {
             case INDIVIDUAL:
-                log.info("Add without tests");
-                return true;
+                log.info("Adding without additional checks");
+                return assignRegistration(registration, skier, course);
 
             case COLLECTIVE_CHILDREN:
-                return handleChildCourse(ageSkieur, course, registration);
+                return handleChildrenRegistration(registration, skier, course, ageSkieur);
 
             default:
-                return handleAdultCourse(ageSkieur, course, registration);
+                return handleAdultRegistration(registration, skier, course, ageSkieur);
         }
     }
 
-    private boolean handleChildCourse(int ageSkieur, Course course, Registration registration) {
+    private Registration handleChildrenRegistration(Registration registration, Skier skier, Course course, int ageSkieur) {
         if (ageSkieur < 16) {
-            log.info("Ok CHILD!");
-            return checkCourseCapacity(course, registration);
+            log.info("Eligible for children course.");
+            if (registrationRepository.countByCourseAndNumWeek(course, registration.getNumWeek()) < 6) {
+                log.info("Course successfully added.");
+                return assignRegistration(registration, skier, course);
+            } else {
+                log.info("Course full! Please choose another week to register.");
+                return null;
+            }
         } else {
-            log.info("Ineligible for children's course; try an adult course");
-            return false;
+            log.info("Age restriction: Register for a Collective Adult Course instead.");
+            return null;
         }
     }
 
-    private boolean handleAdultCourse(int ageSkieur, Course course, Registration registration) {
+    private Registration handleAdultRegistration(Registration registration, Skier skier, Course course, int ageSkieur) {
         if (ageSkieur >= 16) {
-            log.info("Ok ADULT!");
-            return checkCourseCapacity(course, registration);
-        } else {
-            log.info("Ineligible for adult course; try a children's course");
-            return false;
+            log.info("Eligible for adult course.");
+            if (registrationRepository.countByCourseAndNumWeek(course, registration.getNumWeek()) < 6) {
+                log.info("Course successfully added.");
+                return assignRegistration(registration, skier, course);
+            } else {
+                log.info("Course full! Please choose another week to register.");
+                return null;
+            }
         }
-    }
-
-    private boolean checkCourseCapacity(Course course, Registration registration) {
-        if (registrationRepository.countByCourseAndNumWeek(course, registration.getNumWeek()) < 6) {
-            log.info("Course successfully added!");
-            return true;
-        } else {
-            log.info("Course is full; choose another week");
-            return false;
-        }
+        log.info("Age restriction: Register for a Collective Child Course instead.");
+        return null;
     }
 
     private Registration assignRegistration(Registration registration, Skier skier, Course course) {
@@ -161,6 +107,27 @@ public class RegistrationServicesImpl implements IRegistrationServices {
         return registrationRepository.save(registration);
     }
 
+    @Override
+    public Registration addRegistrationAndAssignToSkier(Registration registration, Long numSkier) {
+        Skier skier = skierRepository.findById(numSkier).orElse(null);
+        registration.setSkier(skier);
+        return registrationRepository.save(registration);
+    }
+
+    @Override
+    public Registration assignRegistrationToCourse(Long numRegistration, Long numCourse) {
+        Optional<Registration> registrationOpt = registrationRepository.findById(numRegistration);
+        Optional<Course> courseOpt = courseRepository.findById(numCourse);
+
+        if (registrationOpt.isEmpty() || courseOpt.isEmpty()) {
+            log.info("Registration or Course not found, cannot assign.");
+            return null;
+        }
+
+        Registration registration = registrationOpt.get();
+        registration.setCourse(courseOpt.get());
+        return registrationRepository.save(registration);
+    }
     @Override
     public List<Integer> numWeeksCourseOfInstructorBySupport(Long numInstructor, Support support) {
         return registrationRepository.numWeeksCourseOfInstructorBySupport(numInstructor, support);
