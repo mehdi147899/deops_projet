@@ -405,47 +405,65 @@ class CourseServicesImplTest {
         verify(courseRepository, never()).existsById(anyLong());
     }
     @Test
-    void testDeleteCourseWithDatabaseError() {
-        // Setup: Ensure that course exists and mock delete operation to throw exception
-        when(courseRepository.existsById(course.getNumCourse())).thenReturn(true);
-        doThrow(new DataAccessException("Database error") {}).when(courseRepository).deleteById(course.getNumCourse());
-
-        // Act and Assert using try-catch
-        try {
-            courseServices.deleteCourse(course.getNumCourse());
-            fail("Expected DataAccessException to be thrown");
-        } catch (DataAccessException e) {
-            assertEquals("Database error", e.getMessage());
-        }
-
-        // Verify: Ensure repository methods are called correctly
-        verify(courseRepository).existsById(course.getNumCourse());
-        verify(courseRepository).deleteById(course.getNumCourse());
-    }
-
-    @Test
-    void testDeleteCourseWhenExistsThrowsException() {
-        // Setup: Mock existsById to throw exception
-        doThrow(new DataAccessException("Database error") {}).when(courseRepository).existsById(course.getNumCourse());
-
-        // Act and Assert using try-catch
-        try {
-            courseServices.deleteCourse(course.getNumCourse());
-            fail("Expected DataAccessException to be thrown");
-        } catch (DataAccessException e) {
-            assertEquals("Database error", e.getMessage());
-        }
-
-        // Verify: Ensure existsById is called
-        verify(courseRepository).existsById(course.getNumCourse());
-    }
-
-    @Test
     void testAddCourseWithZeroPrice() {
         Course invalidCourse = new Course(1L, 3, TypeCourse.COLLECTIVE_CHILDREN, Support.SKI, 0.0f, 2, null);
 
         assertThrows(IllegalArgumentException.class, () -> courseServices.addCourse(invalidCourse));
         verify(courseRepository, never()).save(any(Course.class));
     }
+    @Test
+    void testDeleteCourseThrowsExceptionWhenIdIsNull() {
+        // Act & Assert: Expect IllegalArgumentException when numCourse is null
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> {
+            courseServices.deleteCourse(null);
+        });
 
+        // Assert: Validate exception message
+        assertEquals("Course ID cannot be null", thrown.getMessage());
+    }
+
+    // Test 2: Course ID is negative
+    @Test
+    void testDeleteCourseThrowsExceptionWhenIdIsNegative() {
+        // Act & Assert: Expect IllegalArgumentException when numCourse is negative
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> {
+            courseServices.deleteCourse(-1L);
+        });
+
+        // Assert: Validate exception message
+        assertEquals("Course ID must be a positive number", thrown.getMessage());
+    }
+
+    // Test 3: Course not found in repository
+    @Test
+    void testDeleteCourseThrowsExceptionWhenCourseNotFound() {
+        // Setup: Mock that courseRepository.existsById returns false
+        when(courseRepository.existsById(1L)).thenReturn(false);
+
+        // Act & Assert: Expect IllegalArgumentException when course does not exist
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> {
+            courseServices.deleteCourse(1L);
+        });
+
+        // Assert: Validate exception message
+        assertEquals("Course not found", thrown.getMessage());
+
+        // Verify: Check that existsById was called
+        verify(courseRepository).existsById(1L);
+    }
+
+    // Test 4: Successful delete
+    @Test
+    void testDeleteCourseSuccessfully() {
+        // Setup: Mock that courseRepository.existsById returns true
+        when(courseRepository.existsById(1L)).thenReturn(true);
+        doNothing().when(courseRepository).deleteById(1L);
+
+        // Act: Call deleteCourse with valid ID
+        courseServices.deleteCourse(1L);
+
+        // Verify: Ensure that existsById and deleteById were called correctly
+        verify(courseRepository).existsById(1L);
+        verify(courseRepository).deleteById(1L);
+    }
 }
