@@ -86,11 +86,11 @@
     <distributionManagement>
         <repository>
             <id>deploymentRepo</id>
-            <url>http://192.168.1.19:8081/repository/maven-releases/</url>
+            <url>http://192.168.56.3:8081/repository/maven-releases/</url>
         </repository>
         <snapshotRepository>
             <id>deploymentRepo</id>
-            <url>http://192.168.1.19:8081/repository/maven-snapshots/</url>
+            <url>http://192.168.56.3:8081/repository/maven-snapshots/</url>
         </snapshotRepository>
     </distributionManagement>
     <build>
@@ -112,11 +112,6 @@
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <version>0.8.12</version>
-                <configuration>
-                    <excludes>
-                        <exclude>**/entities/**</exclude>
-                    </excludes>
-                </configuration>
                 <executions>
                     <execution>
                         <id>prepare-agent</id>
