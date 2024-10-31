@@ -15,5 +15,7 @@ public interface ICourseServices {
     Course retrieveCourse(Long numCourse);
 
     boolean exists(Long id); // Add this method
+    void deleteCourse(Long numCourse);
+
 
 }

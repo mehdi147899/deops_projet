@@ -182,5 +182,41 @@ class CourseRestControllerTest {
                         .content("{\"numCourse\":1,\"level\":-1,\"typeCourse\":\"INVALID_TYPE\",\"support\":\"SNOWBOARD\",\"price\":150.0,\"timeSlot\":3}")) // Invalid level
                 .andExpect(status().isBadRequest()); // Expect a 400 Bad Request
     }
+    @Test
+    void testDeleteCourse() throws Exception {
+        // Define behavior for the mocked service to successfully delete the course
+        doNothing().when(courseServices).deleteCourse(1L);
+
+        // Perform the DELETE request and verify the response
+        mockMvc.perform(delete("/course/delete/1"))
+                .andExpect(status().isOk()); // Expecting a 200 OK status
+    }
+
+    @Test
+    void testDeleteCourseNotFound() throws Exception {
+        // Mock the service to throw an exception for a non-existent course
+        doThrow(new RuntimeException("Course not found")).when(courseServices).deleteCourse(999L);
+
+        // Perform the DELETE request with a non-existent course ID
+        mockMvc.perform(delete("/course/delete/999"))
+                .andExpect(status().isNotFound()) // Expecting a 404 Not Found status
+                .andExpect(jsonPath("$.error", is("Course not found"))); // Verify error message
+    }
+    @Test
+    void testDeleteCourseBadRequest() throws Exception {
+        // Perform the DELETE request with an invalid ID format
+        mockMvc.perform(delete("/course/delete/invalid"))
+                .andExpect(status().isBadRequest()); // Expecting a 400 Bad Request status
+    }
+    @Test
+    void testDeleteCourseWithDependencies() throws Exception {
+        // Mock the service to throw an exception for a course that has dependencies
+        doThrow(new RuntimeException("Course cannot be deleted as it has dependencies")).when(courseServices).deleteCourse(2L);
+
+        // Perform the DELETE request for a course with dependencies
+        mockMvc.perform(delete("/course/delete/2"))
+                .andExpect(status().isConflict()) // Changed to match expected 409 Conflict status
+                .andExpect(jsonPath("$.error", is("Course cannot be deleted as it has dependencies"))); // Verify error message
+    }
 
 }

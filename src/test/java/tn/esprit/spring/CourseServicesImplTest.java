@@ -386,4 +386,66 @@ class CourseServicesImplTest {
         assertEquals("Course not found", exception.getMessage());
         verify(courseRepository, times(1)).existsById(nonExistingCourse.getNumCourse());
     }
+    @Test
+    void testDeleteCourse() {
+        when(courseRepository.existsById(course.getNumCourse())).thenReturn(true);
+        doNothing().when(courseRepository).deleteById(course.getNumCourse());
+
+        assertDoesNotThrow(() -> courseServices.deleteCourse(course.getNumCourse()));
+        verify(courseRepository, times(1)).existsById(course.getNumCourse());
+        verify(courseRepository).deleteById(course.getNumCourse());
+    }
+    @Test
+    void testDeleteCourseWithNullId() {
+        assertThrows(IllegalArgumentException.class, () -> courseServices.deleteCourse(null));
+    }
+    @Test
+    void testDeleteCourseWithNegativeId() {
+        assertThrows(IllegalArgumentException.class, () -> courseServices.deleteCourse(-1L));
+        verify(courseRepository, never()).existsById(anyLong());
+    }
+    @Test
+    void testDeleteCourseWithDatabaseError() {
+        // Setup: Ensure that course exists and mock delete operation to throw exception
+        when(courseRepository.existsById(course.getNumCourse())).thenReturn(true);
+        doThrow(new DataAccessException("Database error") {}).when(courseRepository).deleteById(course.getNumCourse());
+
+        // Act and Assert using try-catch
+        try {
+            courseServices.deleteCourse(course.getNumCourse());
+            fail("Expected DataAccessException to be thrown");
+        } catch (DataAccessException e) {
+            assertEquals("Database error", e.getMessage());
+        }
+
+        // Verify: Ensure repository methods are called correctly
+        verify(courseRepository).existsById(course.getNumCourse());
+        verify(courseRepository).deleteById(course.getNumCourse());
+    }
+
+    @Test
+    void testDeleteCourseWhenExistsThrowsException() {
+        // Setup: Mock existsById to throw exception
+        doThrow(new DataAccessException("Database error") {}).when(courseRepository).existsById(course.getNumCourse());
+
+        // Act and Assert using try-catch
+        try {
+            courseServices.deleteCourse(course.getNumCourse());
+            fail("Expected DataAccessException to be thrown");
+        } catch (DataAccessException e) {
+            assertEquals("Database error", e.getMessage());
+        }
+
+        // Verify: Ensure existsById is called
+        verify(courseRepository).existsById(course.getNumCourse());
+    }
+
+    @Test
+    void testAddCourseWithZeroPrice() {
+        Course invalidCourse = new Course(1L, 3, TypeCourse.COLLECTIVE_CHILDREN, Support.SKI, 0.0f, 2, null);
+
+        assertThrows(IllegalArgumentException.class, () -> courseServices.addCourse(invalidCourse));
+        verify(courseRepository, never()).save(any(Course.class));
+    }
+
 }

@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import tn.esprit.spring.entities.Course;
+import tn.esprit.spring.entities.TypeCourse;
 import tn.esprit.spring.repositories.ICourseRepository;
 
 import java.util.Collections;
@@ -17,6 +18,19 @@ public class CourseServicesImpl implements ICourseServices {
 
     private final ICourseRepository courseRepository;
     private static final Logger logger = LoggerFactory.getLogger(CourseServicesImpl.class);
+
+    // Error Messages
+    private static final String COURSE_NOT_FOUND = "Course not found";
+    private static final String COURSE_CANNOT_BE_NULL = "Course cannot be null";
+    private static final String COURSE_ID_CANNOT_BE_NULL = "Course ID cannot be null";
+    private static final String COURSE_TYPE_MUST_NOT_BE_NULL = "Course type must not be null";
+    private static final String PRICE_MUST_BE_GREATER_THAN_ZERO = "Price must be greater than 0";
+    private static final String LEVEL_MUST_BE_GREATER_THAN_ZERO = "Level must be greater than zero";
+    private static final String SUPPORT_TYPE_MUST_NOT_BE_NULL = "Support type must not be null";
+    private static final String TIME_SLOT_MUST_BE_GREATER_THAN_ZERO = "Time slot must be greater than zero";
+    private static final String COURSE_ID_MUST_BE_POSITIVE = "Course ID must be a positive number";
+    private static final String UNSUPPORTED_COURSE_TYPE = "Unsupported course type";
+
 
     @Override
     public List<Course> retrieveAllCourses() {
@@ -41,12 +55,12 @@ public class CourseServicesImpl implements ICourseServices {
     @Override
     public Course updateCourse(Course course) {
         if (course == null) {
-            throw new IllegalArgumentException("Course cannot be null");
+            throw new IllegalArgumentException(COURSE_CANNOT_BE_NULL);
         }
 
         // Check if the course exists in the repository
         if (!courseRepository.existsById(course.getNumCourse())) {
-            throw new IllegalArgumentException("Course not found");
+            throw new IllegalArgumentException(COURSE_NOT_FOUND);
         }
 
         // Validate the course object
@@ -54,11 +68,10 @@ public class CourseServicesImpl implements ICourseServices {
         return courseRepository.save(course);
     }
 
-
     @Override
     public Course retrieveCourse(Long numCourse) {
         if (numCourse == null) {
-            throw new IllegalArgumentException("Course ID cannot be null");
+            throw new IllegalArgumentException(COURSE_ID_CANNOT_BE_NULL);
         }
         if (numCourse < 0) {
             throw new IllegalArgumentException("Course ID must not be negative");
@@ -69,29 +82,50 @@ public class CourseServicesImpl implements ICourseServices {
     @Override
     public boolean exists(Long id) {
         if (id == null) {
-            throw new IllegalArgumentException("Course ID cannot be null");
+            throw new IllegalArgumentException(COURSE_ID_CANNOT_BE_NULL);
         }
         return courseRepository.existsById(id);
     }
 
     private void validateCourse(Course course) {
         if (course == null) {
-            throw new IllegalArgumentException("Course cannot be null");
+            throw new IllegalArgumentException(COURSE_CANNOT_BE_NULL);
         }
         if (course.getTypeCourse() == null) {
-            throw new IllegalArgumentException("Course type must not be null");
+            throw new IllegalArgumentException(COURSE_TYPE_MUST_NOT_BE_NULL);
         }
+
+        // Ensure the course type is supported
+        if (course.getTypeCourse() == TypeCourse.INDIVIDUAL) {
+            throw new IllegalArgumentException(UNSUPPORTED_COURSE_TYPE);
+        }
+
         if (course.getPrice() == null || course.getPrice() <= 0) {
-            throw new IllegalArgumentException("Price must be greater than 0");
+            throw new IllegalArgumentException(PRICE_MUST_BE_GREATER_THAN_ZERO);
         }
         if (course.getLevel() <= 0) {
-            throw new IllegalArgumentException("Level must be greater than zero");
+            throw new IllegalArgumentException(LEVEL_MUST_BE_GREATER_THAN_ZERO);
         }
         if (course.getSupport() == null) {
-            throw new IllegalArgumentException("Support type must not be null");
+            throw new IllegalArgumentException(SUPPORT_TYPE_MUST_NOT_BE_NULL);
         }
         if (course.getTimeSlot() <= 0) {
-            throw new IllegalArgumentException("Time slot must be greater than zero");
+            throw new IllegalArgumentException(TIME_SLOT_MUST_BE_GREATER_THAN_ZERO);
         }
+
+    }
+
+    @Override
+    public void deleteCourse(Long numCourse) {
+        if (numCourse == null) {
+            throw new IllegalArgumentException(COURSE_ID_CANNOT_BE_NULL);
+        }
+        if (numCourse < 0) {
+            throw new IllegalArgumentException(COURSE_ID_MUST_BE_POSITIVE);
+        }
+        if (!courseRepository.existsById(numCourse)) {
+            throw new IllegalArgumentException(COURSE_NOT_FOUND);
+        }
+        courseRepository.deleteById(numCourse);
     }
 }

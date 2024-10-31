@@ -65,4 +65,22 @@ public class CourseRestController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
         }
     }
+    @Operation(description = "Delete Course by Id")
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<Object> deleteCourse(@PathVariable("id") Long numCourse) {
+        try {
+            courseServices.deleteCourse(numCourse);
+            return ResponseEntity.ok().build();
+        } catch (RuntimeException e) {
+            String errorMessage = e.getMessage();
+            HttpStatus status = HttpStatus.NOT_FOUND;
+            if ("Course cannot be deleted as it has dependencies".equals(errorMessage)) {
+                status = HttpStatus.CONFLICT;
+            }
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", errorMessage);
+            return ResponseEntity.status(status).body(errorResponse);
+        }
+    }
+
 }
