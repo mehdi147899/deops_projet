@@ -20,13 +20,19 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class CourseRestController {
 
+    private static final String ERROR_KEY = "error";
+    private static final String COURSE_NUMBER_CANNOT_BE_NULL = "Course number cannot be null";
+    private static final String COURSE_NOT_FOUND = "Course not found";
+    private static final String COURSE_HAS_DEPENDENCIES = "Course cannot be deleted as it has dependencies";
+
     private final ICourseServices courseServices;
+
     @Operation(description = "Add Course")
     @PostMapping("/add")
     public ResponseEntity<Object> addCourse(@RequestBody @Valid Course course) {
-        if (course.getNumCourse() == null) { // Add validation check
+        if (course.getNumCourse() == null) {
             Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("error", "Course number cannot be null");
+            errorResponse.put(ERROR_KEY, COURSE_NUMBER_CANNOT_BE_NULL);
             return ResponseEntity.badRequest().body(errorResponse);
         }
         Course addedCourse = courseServices.addCourse(course);
@@ -46,11 +52,9 @@ public class CourseRestController {
             Course updatedCourse = courseServices.updateCourse(course);
             return ResponseEntity.ok(updatedCourse);
         } catch (RuntimeException e) {
-            // Return 404 Not Found with error message
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
     }
-
 
     @Operation(description = "Retrieve Course by Id")
     @GetMapping("/get/{id}")
@@ -59,12 +63,12 @@ public class CourseRestController {
             Course course = courseServices.retrieveCourse(numCourse);
             return ResponseEntity.ok(course);
         } catch (RuntimeException e) {
-            // Return 404 Not Found with error message as a Map
             Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("error", "Course not found");
+            errorResponse.put(ERROR_KEY, COURSE_NOT_FOUND);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
         }
     }
+
     @Operation(description = "Delete Course by Id")
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Object> deleteCourse(@PathVariable("id") Long numCourse) {
@@ -74,13 +78,12 @@ public class CourseRestController {
         } catch (RuntimeException e) {
             String errorMessage = e.getMessage();
             HttpStatus status = HttpStatus.NOT_FOUND;
-            if ("Course cannot be deleted as it has dependencies".equals(errorMessage)) {
+            if (COURSE_HAS_DEPENDENCIES.equals(errorMessage)) {
                 status = HttpStatus.CONFLICT;
             }
             Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("error", errorMessage);
+            errorResponse.put(ERROR_KEY, errorMessage);
             return ResponseEntity.status(status).body(errorResponse);
         }
     }
-
 }
