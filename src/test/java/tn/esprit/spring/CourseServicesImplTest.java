@@ -466,4 +466,41 @@ class CourseServicesImplTest {
         verify(courseRepository).existsById(1L);
         verify(courseRepository).deleteById(1L);
     }
+    // Test: Adding a course with unsupported type (INDIVIDUAL)
+    @Test
+    void testAddCourseThrowsExceptionForUnsupportedType() {
+        // Arrange: Create a course with TypeCourse.INDIVIDUAL
+        Course courseWithUnsupportedType = new Course(8L, 2, TypeCourse.INDIVIDUAL, Support.SKI, 150.0f, 3, null);
+
+        // Act & Assert: Expect IllegalArgumentException for unsupported course type
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> {
+            courseServices.addCourse(courseWithUnsupportedType);
+        });
+
+        // Assert: Validate the exception message
+        assertEquals("Unsupported course type", thrown.getMessage());
+
+        // Verify: Ensure the repository method was never called
+        verify(courseRepository, never()).save(any(Course.class));
+    }
+
+    // Test: Updating a course with unsupported type (INDIVIDUAL)
+    @Test
+    void testUpdateCourseThrowsExceptionForUnsupportedType() {
+        // Arrange: Mock that the course exists
+        when(courseRepository.existsById(anyLong())).thenReturn(true);
+        Course courseWithUnsupportedType = new Course(9L, 2, TypeCourse.INDIVIDUAL, Support.SKI, 150.0f, 3, null);
+
+        // Act & Assert: Expect IllegalArgumentException for unsupported course type
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> {
+            courseServices.updateCourse(courseWithUnsupportedType);
+        });
+
+        // Assert: Validate the exception message
+        assertEquals("Unsupported course type", thrown.getMessage());
+
+        // Verify: Ensure the repository method was never called
+        verify(courseRepository, never()).save(any(Course.class));
+    }
+
 }
