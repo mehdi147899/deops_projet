@@ -10,13 +10,15 @@
     </parent>
     <groupId>tn.esprit.spring</groupId>
     <artifactId>gestion-station-ski</artifactId>
-    <version>1.1</version>
+    <version>1.1-SNAPSHOT</version> <!-- Set to SNAPSHOT for Nexus overwrites -->
     <name>gestion-station-ski</name>
     <description>Demo project for Spring Boot</description>
+
     <properties>
         <java.version>17</java.version>
         <maven-jar-plugin.version>3.1.1</maven-jar-plugin.version>
     </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -53,7 +55,7 @@
         <dependency>
             <groupId>org.hibernate.validator</groupId>
             <artifactId>hibernate-validator</artifactId>
-            <version>6.2.0.Final</version> <!-- Added this dependency -->
+            <version>6.2.0.Final</version>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
@@ -93,6 +95,7 @@
             <url>http://192.168.56.3:8081/repository/maven-snapshots/</url>
         </snapshotRepository>
     </distributionManagement>
+
     <build>
         <plugins>
             <plugin>
@@ -125,7 +128,6 @@
                             <goal>report</goal>
                         </goals>
                     </execution>
-
                 </executions>
             </plugin>
         </plugins>
