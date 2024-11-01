@@ -1,0 +1,115 @@
+pipeline {
+    agent any
+
+    environment {
+        SONARQUBE_SERVER = 'sonarqube-docker' // SonarQube server name configured in Jenkins
+        NEXUS_URL = 'http://192.168.81.128:8081/repository/maven-releases/' // Nexus container URL
+        NEXUS_CREDENTIALS_ID = 'nexus' // Jenkins credentials ID for Nexus
+        APP_VERSION = '1.0.0'
+        DOCKER_HUB_CREDENTIALS = 'docker-hub' // Jenkins credentials ID for Docker Hub
+        DOCKER_IMAGE_NAME = 'dockghass/tp-ski' // Docker image name
+        DOCKER_TAG = '1.0.0' // Docker image tag (version)
+    }
+
+    stages {
+        stage('Pull from GitHub') {
+            steps {
+                // Clone the repository from GitHub, focusing on the 'foyer' folder
+
+                    git url: 'https://github.com/mehdi147899/deops_projet.git', branch: 'ghassen'
+
+            }
+        }
+
+        stage('Compile and Build') {
+            steps {
+
+                    // Compile and build using Maven in the 'foyer' directory
+                    sh 'mvn clean compile'
+
+            }
+        }
+
+        stage('SonarQube Analysis') {
+            steps {
+
+                    // Run SonarQube analysis using SonarQube scanner configured in Jenkins
+                    withSonarQubeEnv("${SONARQUBE_SERVER}") {
+                        sh 'mvn sonar:sonar'
+                    }
+
+            }
+        }
+
+        stage('Run Unit Tests (JUnit/Mockito)') {
+            steps {
+
+                    // Run JUnit/Mockito unit tests in the 'foyer' directory
+                    sh 'mvn test'
+
+            }
+        }
+
+        stage('Deploy to Nexus') {
+            steps {
+
+                    // Deploy the built JAR artifact to Nexus repository
+                    sh "mvn deploy -DskipTests -Drevision=${env.APP_VERSION}"
+
+            }
+        }
+        stage('Build Docker Image') {
+            steps {
+
+                    // Build the Docker image
+                    script {
+                        sh """
+                            docker build -t ${DOCKER_IMAGE_NAME}:${DOCKER_TAG} .
+                        """
+                    }
+
+            }
+        }
+        stage('Push Docker Image to Docker Hub') {
+            steps {
+                script {
+                    // Log in to Docker Hub and push the image
+                    withCredentials([usernamePassword(credentialsId: "${DOCKER_HUB_CREDENTIALS}", passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
+                        sh """
+                            echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+                            docker push ${DOCKER_IMAGE_NAME}:${DOCKER_TAG}
+                        """
+                    }
+                }
+            }
+        }
+        stage('Verify Docker Image') {
+            steps {
+                script {
+                    // Run the Docker Compose setup to verify the image
+                    sh 'docker compose -f docker-compose.yaml up -d'
+
+                    // Optional: Wait for the services to fully start
+                    sh 'sleep 30'
+
+                    // Verify that the Spring Boot application is running
+                    sh 'docker compose -f docker-compose.yaml ps'
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            echo 'Cleaning up after build...'
+            sh 'docker compose -f docker-compose.yaml down'
+
+        }
+        success {
+            echo 'Pipeline succeeded!'
+        }
+        failure {
+            echo 'Pipeline failed.'
+        }
+    }
+}
