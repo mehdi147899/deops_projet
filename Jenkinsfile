@@ -1,6 +1,11 @@
 pipeline {
     agent any
 
+    environment {
+            SONARQUBE_SERVER = 'SonarQube'
+            MAVEN_SETTINGS = '/usr/share/maven/conf/settings.xml'
+        }
+
     stages {
         stage('Checkout') {
             steps {
@@ -15,6 +20,18 @@ pipeline {
                         }
                     }
 
+        stage('SonarQube Analysis') {
+                    steps {
+                        script {
+                            withSonarQubeEnv('SonarQube') {
+
+                            sh 'mvn sonar:sonar -Dsonar.projectKey=backend_devops'
+
+                            }
+                        }
+                    }
+                }
+
         stage('Build Docker Image') {
                     steps {
 
@@ -22,5 +39,14 @@ pipeline {
 
                     }
                 }
+
+
+
+
+
+
+
+
+
     }
 }
