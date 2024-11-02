@@ -14,5 +14,13 @@ pipeline {
                             sh 'mvn install -DskipTests'
                         }
                     }
+                    
+        stage('Build Docker Image') {
+                    steps {
+
+                            sh "docker build -t bilelkort:latest ."
+
+                    }
+                }
     }
 }
