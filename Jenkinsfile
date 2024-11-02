@@ -4,8 +4,7 @@ pipeline {
     environment {
             SONARQUBE_SERVER = 'SonarQube'
             MAVEN_SETTINGS = '/usr/share/maven/conf/settings.xml'
-            DOCKER_HUB_CREDENTIALS = credentials('dockerhub') // Use your Jenkins credentials ID
-            DOCKER_IMAGE_NAME = 'bilelkort/devops'
+            
             dockerImage = ""
         }
 
