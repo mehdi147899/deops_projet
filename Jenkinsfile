@@ -32,6 +32,18 @@ pipeline {
                     }
                 }
 
+        stage('Deploy to Nexus') {
+                    steps {
+
+                    // Assurez-vous que vous êtes dans le bon répertoire
+        script {
+
+                            sh "mvn deploy -DskipTests -s ${MAVEN_SETTINGS} -DaltDeploymentRepository=deploymentRepo::default::http://192.168.33.10:8081/repository/maven-releases/"
+                        }                                    }
+
+
+                }
+
         stage('Build Docker Image') {
                     steps {
 
