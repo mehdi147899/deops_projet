@@ -151,7 +151,6 @@ class CourseRestControllerTest {
         course.setPrice(100.0f);
         course.setTimeSlot(2);
 
-        // Mock the service method to return the course for the given ID
         when(courseServices.retrieveCourse(1L)).thenReturn(course);
 
         // Perform the GET request and verify the response
