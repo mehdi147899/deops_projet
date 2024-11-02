@@ -21,16 +21,19 @@ pipeline {
                     }
 
         stage('SonarQube Analysis') {
-                    steps {
-
-                            withSonarQubeEnv('SonarQube') {
-
-                            sh 'mvn sonar:sonar -Dsonar.projectKey=devops'
-
-                            }
-
+            steps {
+                script {
+                    withSonarQubeEnv('SonarQube') {
+                        // Use the token for authentication
+                        sh '''
+                            mvn clean verify sonar:sonar \
+                            -Dsonar.projectKey=devops \
+                            -Dsonar.login=${env.SONARQUBE_TOKEN}
+                        '''
                     }
                 }
+            }
+        }
 
         stage('Build Docker Image') {
                     steps {
