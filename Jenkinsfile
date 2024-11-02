@@ -25,10 +25,10 @@ pipeline {
 
                             withSonarQubeEnv('SonarQube') {
 
-                            sh 'mvn sonar:sonar -Dsonar.projectKey=backend_devops'
+                            sh 'mvn sonar:sonar -Dsonar.projectKey=devops'
 
                             }
-                        
+
                     }
                 }
 
