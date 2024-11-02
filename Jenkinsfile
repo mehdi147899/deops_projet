@@ -4,7 +4,7 @@ pipeline {
     environment {
             SONARQUBE_SERVER = 'SonarQube'
             MAVEN_SETTINGS = '/usr/share/maven/conf/settings.xml'
-            
+
             dockerImage = ""
         }
 
