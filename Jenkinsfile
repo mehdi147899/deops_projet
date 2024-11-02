@@ -6,6 +6,7 @@ pipeline {
             MAVEN_SETTINGS = '/usr/share/maven/conf/settings.xml'
             DOCKER_HUB_CREDENTIALS = credentials('dockerhub') // Use your Jenkins credentials ID
             DOCKER_IMAGE_NAME = 'bilelkort/devops'
+            dockerImage = ""
         }
 
     stages {
@@ -46,26 +47,30 @@ pipeline {
 
                 }
 
-        stage('Build Docker Image') {
+//         stage('Build Docker Image') {
+//                     steps {
+//
+//                             sh "docker build -t bilelkort:latest ."
+//
+//                     }
+//                 }
+
+        stage('Docker Image') {
                     steps {
-
-                            sh "docker build -t bilelkort:latest ."
-
+                        script {
+                            dockerImage = docker.build "bilelkort/devops:latest"
+                        }
                     }
                 }
 
 
-        stage('Push to Docker Hub') {
+
+        stage('Docker Hub') {
                     steps {
                         script {
-                            // Login to Docker Hub
-                            sh "echo ${DOCKER_HUB_CREDENTIALS_PSW} | docker login -u ${DOCKER_HUB_CREDENTIALS_USR} --password-stdin"
-
-                            // Tag the image
-                            sh "docker tag bilelkort:latest ${DOCKER_IMAGE_NAME}:latest"
-
-                            // Push the image
-                            sh "docker push ${DOCKER_IMAGE_NAME}:latest"
+                            docker.withRegistry( '', 'dockerhub' ) {
+                                dockerImage.push()
+                            }
                         }
                     }
                 }
