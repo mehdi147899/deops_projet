@@ -4,7 +4,6 @@ pipeline {
     environment {
             SONARQUBE_SERVER = 'SonarQube'
             MAVEN_SETTINGS = '/usr/share/maven/conf/settings.xml'
-            SONARQUBE_TOKEN = credentials('8753e65d-8711-4208-9eed-fbdb00aade7e')
         }
 
     stages {
@@ -25,12 +24,9 @@ pipeline {
                     steps {
                         script {
                             withSonarQubeEnv('SonarQube') {
-                                // Using double quotes for variable substitution
-                                sh """
-                                    mvn clean verify sonar:sonar \
-                                    -Dsonar.projectKey=devops \
-                                    -Dsonar.login=${SONARQUBE_TOKEN}
-                                """
+
+                            sh 'mvn sonar:sonar -Dsonar.projectKey=projet'
+
                             }
                         }
                     }
