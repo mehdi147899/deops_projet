@@ -5,8 +5,8 @@ services:
     image: mysql:5.7
     restart: always
     environment:
-      - MYSQL_ROOT_PASSWORD=123456
-      - MYSQL_DATABASE=stationSki
+      - MYSQL_ROOT_PASSWORD=123456  # Set a secure password here
+      - MYSQL_DATABASE=stationSki  # This should create the database on container start
     ports:
       - 3306:3306
     volumes:
@@ -24,7 +24,7 @@ services:
       SPRING_APPLICATION_JSON: '{
         "spring.datasource.url"  : "jdbc:mysql://mysqldb:3306/stationSki?useSSL=false",
         "spring.datasource.username" : "root",
-        "spring.datasource.password" : "123456",
+        "spring.datasource.password" : "123456",  # Match the MySQL root password here
         "spring.jpa.properties.hibernate.dialect" : "org.hibernate.dialect.MySQL5InnoDBDialect",
         "spring.jpa.hibernate.ddl-auto" : "update",
         "management.endpoints.web.exposure.include" : "*"
