@@ -3,7 +3,7 @@ version: "3.8"
 services:
   mysqldb:
     image: mysql:5.7
-    restart: unless-stopped
+    restart: always
     environment:
       - MYSQL_ROOT_PASSWORD=123456
       - MYSQL_DATABASE=stationSki
