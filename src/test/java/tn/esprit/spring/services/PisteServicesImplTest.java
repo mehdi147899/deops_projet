@@ -1,76 +1,89 @@
 package tn.esprit.spring.services;
 
-import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
-import tn.esprit.spring.entities.Piste;
 import tn.esprit.spring.entities.Color;
+import tn.esprit.spring.entities.Piste;
 import tn.esprit.spring.repositories.IPisteRepository;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Optional;
+import java.util.List;
+import java.util.ArrayList;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class PisteServicesImplTest {
 
-    @Mock
-    IPisteRepository pisteRepository;
-
     @InjectMocks
-    PisteServicesImpl pisteService;
+    private PisteServicesImpl pisteServices;
 
-    @Test
-    void retrieveAllPistes() {
-        List<Piste> pisteList = Arrays.asList(
-                new Piste(1L, "Piste 1", Color.BLUE, 1000, 30, new HashSet<>()),
-                new Piste(2L, "Piste 2", Color.RED, 1500, 40, new HashSet<>())
-        );
+    @Mock
+    private IPisteRepository pisteRepository;
 
-        Mockito.when(pisteRepository.findAll()).thenReturn(pisteList);
-        List<Piste> results = pisteService.retrieveAllPistes();
+    private Piste piste;
 
-        Mockito.verify(pisteRepository, Mockito.times(1)).findAll();
-        Assertions.assertEquals(2, results.size());
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+        piste = new Piste(1L, "Alpine", Color.BLUE, 300, 15, null);
     }
 
     @Test
-    void addPiste() {
-        Piste piste = new Piste(1L, "Piste 1", Color.GREEN, 1200, 35, new HashSet<>());
+    void testRetrieveAllPistes() {
+        List<Piste> pistes = new ArrayList<>();
+        pistes.add(piste);
+        when(pisteRepository.findAll()).thenReturn(pistes);
 
-        Mockito.when(pisteRepository.save(piste)).thenReturn(piste);
-        Piste result = pisteService.addPiste(piste);
-
-        Mockito.verify(pisteRepository, Mockito.times(1)).save(piste);
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals("Piste 1", result.getNamePiste());
-        Assertions.assertEquals(Color.GREEN, result.getColor());
+        List<Piste> retrievedPistes = pisteServices.retrieveAllPistes();
+        assertEquals(1, retrievedPistes.size());
+        assertEquals(piste.getNamePiste(), retrievedPistes.get(0).getNamePiste());
+        verify(pisteRepository, times(1)).findAll();
     }
 
     @Test
-    void removePiste() {
-        Long numPiste = 1L;
+    void testAddPiste() {
+        when(pisteRepository.save(any(Piste.class))).thenReturn(piste);
 
-        pisteService.removePiste(numPiste);
-
-        Mockito.verify(pisteRepository, Mockito.times(1)).deleteById(numPiste);
+        Piste createdPiste = pisteServices.addPiste(piste);
+        assertEquals(piste.getNumPiste(), createdPiste.getNumPiste());
+        assertEquals(piste.getNamePiste(), createdPiste.getNamePiste());
+        verify(pisteRepository, times(1)).save(any(Piste.class));
     }
 
     @Test
-    void retrievePiste() {
-        Long numPiste = 1L;
-        Piste piste = new Piste(numPiste, "Piste 1", Color.BLACK, 2000, 45, new HashSet<>());
+    void testRemovePiste() {
+        Long pisteId = 1L;
+        doNothing().when(pisteRepository).deleteById(pisteId);
 
-        Mockito.when(pisteRepository.findById(numPiste)).thenReturn(Optional.of(piste));
-        Piste result = pisteService.retrievePiste(numPiste);
+        pisteServices.removePiste(pisteId);
+        verify(pisteRepository, times(1)).deleteById(pisteId);
+    }
 
-        Mockito.verify(pisteRepository, Mockito.times(1)).findById(numPiste);
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(numPiste, result.getNumPiste());
+    @Test
+    void testRetrievePiste() {
+        Long pisteId = 1L;
+        when(pisteRepository.findById(pisteId)).thenReturn(Optional.of(piste));
+
+        Piste retrievedPiste = pisteServices.retrievePiste(pisteId);
+        assertNotNull(retrievedPiste);
+        assertEquals(piste.getNamePiste(), retrievedPiste.getNamePiste());
+        verify(pisteRepository, times(1)).findById(pisteId);
+    }
+
+    @Test
+    void testRetrievePisteNotFound() {
+        Long pisteId = 2L;
+        when(pisteRepository.findById(pisteId)).thenReturn(Optional.empty());
+
+        Piste retrievedPiste = pisteServices.retrievePiste(pisteId);
+        assertNull(retrievedPiste);
+        verify(pisteRepository, times(1)).findById(pisteId);
     }
 }
