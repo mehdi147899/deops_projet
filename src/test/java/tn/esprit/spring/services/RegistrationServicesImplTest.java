@@ -37,7 +37,7 @@ class RegistrationServicesImplTest {
 
     private Skier skier;
     private Course course;
-    private Registration registration;
+
 
     @BeforeEach
     void setUp() {
@@ -49,7 +49,6 @@ class RegistrationServicesImplTest {
         course.setNumCourse(1L);
         course.setTypeCourse(TypeCourse.INDIVIDUAL); // Set a default TypeCourse to avoid NullPointerException
 
-        registration = new Registration();
     }
 
     @Test
