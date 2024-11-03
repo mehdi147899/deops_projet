@@ -9,7 +9,7 @@ COPY pom.xml .
 COPY src ./src
 
 # Step 2: Build the Spring Boot application
-RUN mvn clean package -DskipTests
+RUN mvn clean package -DskipTest
 
 # Step 3: Use an official OpenJDK image to run the app
 FROM openjdk:17-jdk-slim
