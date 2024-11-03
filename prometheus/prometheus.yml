@@ -3,4 +3,4 @@ scrape_config:
 - job_name: 'Spring'
   metrics_path: '/actuator/prometheus'
   static_configs:
-    - targets: ['192.168.170.100:8089']
+    - targets: ['192.168.1.100:8089']
