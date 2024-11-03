@@ -14,7 +14,7 @@ services:
   app-timesheet:
     depends_on:
       - mysqldb
-    build: skanderlazreg/gestionStationSki:1.0.0
+    build: skanderlazreg/gestionstationski
     restart: on-failure
     ports:
       - 8082:8082
