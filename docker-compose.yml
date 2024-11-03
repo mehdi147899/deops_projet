@@ -15,21 +15,22 @@ services:
   app-timesheet:
     depends_on:
       - mysqldb
-    image: skanderlazreg/gestionstationski:1.0.0
+    image: imenhmedi/devops
     build: ./
     restart: on-failure
     ports:
       - 8089:8089
     environment:
       SPRING_APPLICATION_JSON: '{
-              "spring.datasource.url"  : "jdbc:mysql://mysqldb:3306/stationSki?createDatabaseIfNotExist=true",
-              "spring.datasource.username" : "root",
-              "spring.datasource.password" : "123456",
-              "spring.jpa.properties.hibernate.dialect" : "org.hibernate.dialect.MySQL5InnoDBDialect",
-              "spring.jpa.hibernate.ddl-auto" : "update"
-            }'
+        "spring.datasource.url"  : "jdbc:mysql://mysqldb:3306/stationSki?createDatabaseIfNotExist=true",
+        "spring.datasource.username" : "root",
+        "spring.datasource.password" : "123456",
+        "spring.jpa.properties.hibernate.dialect" : "org.hibernate.dialect.MySQL5InnoDBDialect",
+        "spring.jpa.hibernate.ddl-auto" : "update"
+      }'
     stdin_open: true
     tty: true
+
 
 volumes:
   db :

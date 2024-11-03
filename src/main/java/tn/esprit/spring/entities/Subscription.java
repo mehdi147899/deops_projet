@@ -3,7 +3,7 @@ package tn.esprit.spring.entities;
 import java.io.Serializable;
 import java.time.LocalDate;
 
-import jakarta.persistence.*;
+import javax.persistence.*;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;

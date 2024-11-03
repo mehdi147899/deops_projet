@@ -1,6 +1,7 @@
 package tn.esprit.spring.services;
 
 import tn.esprit.spring.entities.Course;
+import tn.esprit.spring.entities.TypeCourse;
 
 import java.util.List;
 
@@ -14,6 +15,5 @@ public interface ICourseServices {
 
     Course retrieveCourse(Long numCourse);
 
-    boolean exists(Long id); // Add this method
 
 }
