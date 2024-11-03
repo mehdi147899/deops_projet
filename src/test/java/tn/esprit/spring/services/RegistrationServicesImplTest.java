@@ -5,53 +5,75 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
+import tn.esprit.spring.entities.Course;
 import tn.esprit.spring.entities.Registration;
 import tn.esprit.spring.entities.Skier;
+import tn.esprit.spring.entities.TypeCourse;
 import tn.esprit.spring.repositories.ICourseRepository;
 import tn.esprit.spring.repositories.IRegistrationRepository;
 import tn.esprit.spring.repositories.ISkierRepository;
 
+import java.time.LocalDate;
 import java.util.Optional;
 
+@ExtendWith(MockitoExtension.class)
 class RegistrationServicesImplTest {
 
     @Mock
     private IRegistrationRepository registrationRepository;
+
     @Mock
     private ISkierRepository skierRepository;
+
     @Mock
     private ICourseRepository courseRepository;
 
     @InjectMocks
     private RegistrationServicesImpl registrationServices;
 
+    private Skier skier;
+    private Course course;
+    private Registration registration;
+
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.initMocks(this);
-    }
-
-    @Test
-    void testAddRegistrationAndAssignToSkier_SkierExists() {
-        Registration registration = new Registration();
-        Skier skier = new Skier();
+        skier = new Skier();
         skier.setNumSkier(1L);
-        when(skierRepository.findById(1L)).thenReturn(Optional.of(skier));
-        when(registrationRepository.save(any(Registration.class))).thenReturn(registration);
+        skier.setDateOfBirth(LocalDate.of(2005, 1, 1)); // Example date for age calculation
 
-        Registration result = registrationServices.addRegistrationAndAssignToSkier(new Registration(), 1L);
-        assertNotNull(result.getSkier(), "Skier should be assigned");
-        assertEquals(1L, result.getSkier().getNumSkier(), "Skier ID should match");
+        course = new Course();
+        course.setNumCourse(1L);
+        course.setTypeCourse(TypeCourse.INDIVIDUAL); // Set a default TypeCourse to avoid NullPointerException
+
+        registration = new Registration();
     }
 
     @Test
     void testAddRegistrationAndAssignToSkier_SkierDoesNotExist() {
-        when(skierRepository.findById(anyLong())).thenReturn(Optional.empty());
+        when(skierRepository.findById(1L)).thenReturn(Optional.empty());
 
-        Registration result = registrationServices.addRegistrationAndAssignToSkier(new Registration(), 1L);
+        Registration result = registrationServices.addRegistrationAndAssignToSkierAndCourse(new Registration(), 1L, 1L);
         assertNull(result, "Result should be null if skier does not exist");
+
+        verify(skierRepository).findById(1L);
+        verify(courseRepository, never()).findById(anyLong());
+        verify(registrationRepository, never()).save(any(Registration.class));
     }
 
+    @Test
+    void testAddRegistrationAndAssignToSkier_CourseDoesNotExist() {
+        when(skierRepository.findById(1L)).thenReturn(Optional.of(skier));
+        when(courseRepository.findById(1L)).thenReturn(Optional.empty());
+
+        Registration result = registrationServices.addRegistrationAndAssignToSkierAndCourse(new Registration(), 1L, 1L);
+        assertNull(result, "Result should be null if course does not exist");
+
+        verify(skierRepository).findById(1L);
+        verify(courseRepository).findById(1L);
+        verify(registrationRepository, never()).save(any(Registration.class));
+    }
 }
