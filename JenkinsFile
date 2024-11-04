@@ -14,7 +14,7 @@ pipeline {
                 echo 'Cloning the repository...'
                 git branch: 'imen',
                 url: 'https://github.com/mehdi147899/deops_projet.git',
-                credentialsId: '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'
+                credentialsId: ''
             }
         }
 
