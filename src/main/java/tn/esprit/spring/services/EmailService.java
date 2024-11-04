@@ -9,7 +9,7 @@ public class EmailService {
 
     private final JavaMailSender mailSender;
 
-    // Constructor injection for better practice
+    // Constructor injection
     public EmailService(JavaMailSender mailSender) {
         this.mailSender = mailSender;
     }
