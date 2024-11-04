@@ -22,9 +22,9 @@
         <sonar.login>${env.SONAR_TOKEN}</sonar.login>
     </properties>
 
- <!-- SONARQUBE -->
-    
+    <!-- SONARQUBE -->
 
+    
 
     <dependencies>
         <!-- Spring Boot and Web Dependencies -->
@@ -81,11 +81,11 @@
             <scope>test</scope>
         </dependency>
 
-            <!-- LOG4J2    -->
+        <!-- LOG4J2 -->
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-core</artifactId>
-            <version>2.14.1</version> <!-- Assurez-vous d'utiliser une version compatible -->
+            <version>2.14.1</version>
         </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
@@ -93,7 +93,7 @@
             <version>2.14.1</version>
         </dependency>
 
-        <!-- JUnit    -->
+        <!-- JUnit -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
@@ -125,8 +125,16 @@
             <artifactId>junit</artifactId>
             <scope>test</scope>
         </dependency>
-
     </dependencies>
+
+    <!-- Deploy to Nexus -->
+    <distributionManagement>
+        <repository>
+            <id>deploymentRepo</id>
+            <name>Nexus Repository</name>
+            <url>http://192.168.1.101:8082/repository/maven-releases/</url>
+        </repository>
+    </distributionManagement>
 
     <build>
         <plugins>
@@ -157,7 +165,6 @@
                 <version>3.9.1.2184</version>
             </plugin>
 
-        </plugins>    
-        
+        </plugins>
     </build>
 </project>
