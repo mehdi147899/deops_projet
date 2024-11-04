@@ -6,11 +6,12 @@ import tn.esprit.spring.entities.Piste;
 import tn.esprit.spring.repositories.IPisteRepository;
 
 import java.util.List;
+
 @AllArgsConstructor
 @Service
-public class PisteServicesImpl implements  IPisteServices{
+public class PisteServicesImpl implements IPisteServices {
 
-    private IPisteRepository pisteRepository;
+    private final IPisteRepository pisteRepository;
 
     @Override
     public List<Piste> retrieveAllPistes() {
