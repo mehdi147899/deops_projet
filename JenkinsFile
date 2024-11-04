@@ -4,7 +4,9 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git 'https://github.com/mehdi147899/deops_projet.git'
+                url: 'https://github.com/mehdi147899/deops_projet.git',
+                branch: 'BaghouliAmine',
+                credentialsId: 'github'
             }
         }
         stage('Build') {
@@ -14,9 +16,7 @@ pipeline {
         }
         stage('SonarQube Analysis') {
             steps {
-                withSonarQubeEnv('SonarQube') {
-                    sh 'mvn sonar:sonar'
-                }
+                sh 'mvn sonar:sonar -Dsonar.projectKey=sonardevops -Dsonar.sources=src/main/java -Dsonar.host.url=http://192.168.1.101:9000 -Dsonar.token=squ_0cde13cc506c9f2f7da5b140a90e8ba33f9289bf '
             }
         }
         stage('Quality Gate') {
