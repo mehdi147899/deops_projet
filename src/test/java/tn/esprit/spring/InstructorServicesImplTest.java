@@ -37,7 +37,11 @@ class InstructorServicesImplTest {
         instructor = new Instructor(1L, "John", "Doe", LocalDate.of(2020, 1, 1), new HashSet<>());
         course = new Course(1L, 1, null, null, 100.0f, 2, null);
     }
-
+    @Test
+    void testRetrieveInstructorWithNullId() {
+        assertThrows(IllegalArgumentException.class, () -> instructorServices.retrieveInstructor(null));
+        verify(instructorRepository, never()).findById(anyLong());
+    }
     @Test
     void testAddInstructor() {
         when(instructorRepository.save(any(Instructor.class))).thenReturn(instructor);
