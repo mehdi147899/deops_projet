@@ -1,0 +1,80 @@
+pipeline {
+    agent any
+
+    environment {
+        SONARQUBE_TOKEN = credentials('SonarToken')  // Replace with your SonarQube credential ID
+        SONARQUBE_URL = 'http://192.168.1.21:9000/'  // Your SonarQube server URL
+        dockerImage=""
+    }
+
+    stages {
+
+        stage(' Code from GitHub') {
+            steps {
+                echo 'Cloning the repository...'
+                git branch: 'imen',
+                url: 'https://github.com/mehdi147899/deops_projet.git',
+                credentialsId: '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'
+            }
+        }
+
+        stage('Maven Clean & Build') {
+            steps {
+                echo 'Running Maven clean and build...'
+                sh 'mvn clean install -DskipTests'
+            }
+        }
+
+        stage('SonarQube & Jacoco') {
+            steps {
+                echo 'Running tests, generating code coverage, and SonarQube analysis...'
+                sh """
+                    mvn clean test jacoco:report sonar:sonar \
+                    -Dsonar.host.url=${SONARQUBE_URL} \
+                    -Dsonar.login=${SONARQUBE_TOKEN}
+                """
+            }
+        }
+
+        stage('Run Unit Tests') {
+            steps {
+                echo 'Running unit tests...'
+                sh 'mvn test'
+            }
+        }
+
+        stage('Nexus') {
+            steps {
+                echo 'Deploying artifacts to Nexus...'
+                sh 'mvn deploy -X'
+            }
+        }
+
+        stage('Docker Image') {
+                    steps {
+                        script {
+                            dockerImage = docker.build "imenhmedi/devops"
+                        }
+                    }
+                }
+
+
+
+        stage('Docker Hub') {
+                    steps {
+                        script {
+                            docker.withRegistry( '', 'docker-hub' ) {
+                                dockerImage.push()
+                            }
+                        }
+                    }
+                }
+
+
+        stage('Docker Compose') {
+            steps {
+                sh 'docker compose up -d'
+            }
+        }
+    }
+}
