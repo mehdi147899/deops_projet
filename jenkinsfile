@@ -12,7 +12,9 @@ pipeline {
         stage(' Code from GitHub') {
             steps {
                 echo 'Cloning the repository...'
-               
+                git branch: 'imen',
+                url: 'https://github.com/mehdi147899/deops_projet.git',
+                credentialsId: '****'
             }
         }
 
