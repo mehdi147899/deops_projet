@@ -11,11 +11,12 @@ pipeline {
 
         stage(' Code from GitHub') {
             steps {
-                echo 'Cloning the repository...'
-                git branch: 'imen',
-                url: 'https://github.com/deops_projet.git',
-                credentialsId: 'GitHub_Credential_ID'
-            }
+                  git (
+                  url: 'https://github.com/mehdi147899/deops_projet.git',
+                  branch: 'imen',
+                  credentialsId: 'github'
+                      )
+                  }
         }
 
         stage('Maven Clean & Build') {
