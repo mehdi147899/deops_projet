@@ -81,22 +81,62 @@ class InstructorServicesImplTest {
     }
 
     @Test
+    void testRetrieveInstructor_NotFound() {
+        when(instructorRepository.findById(2L)).thenReturn(Optional.empty());
+
+        Instructor retrievedInstructor = instructorServices.retrieveInstructor(2L);
+
+        assertNull(retrievedInstructor);
+        verify(instructorRepository, times(1)).findById(2L);
+    }
+
+    @Test
     void testAddInstructorAndAssignToCourse() {
-        // Création d'un objet Course avec numCourse
         Course course = new Course();
         course.setNumCourse(1L);
 
-        // Simulation du comportement des repositories
         when(courseRepository.findById(1L)).thenReturn(Optional.of(course));
         when(instructorRepository.save(instructor)).thenReturn(instructor);
 
-        // Appel du service
         Instructor savedInstructor = instructorServices.addInstructorAndAssignToCourse(instructor, 1L);
 
-        // Vérifications
         assertNotNull(savedInstructor);
         assertEquals(1, savedInstructor.getCourses().size());
         verify(courseRepository, times(1)).findById(1L);
         verify(instructorRepository, times(1)).save(instructor);
+    }
+
+    @Test
+    void testAddInstructorAndAssignToCourse_CourseNotFound() {
+        when(courseRepository.findById(2L)).thenReturn(Optional.empty());
+
+        Instructor savedInstructor = instructorServices.addInstructorAndAssignToCourse(instructor, 2L);
+
+        assertNotNull(savedInstructor);
+        assertTrue(savedInstructor.getCourses().isEmpty());
+        verify(courseRepository, times(1)).findById(2L);
+        verify(instructorRepository, times(1)).save(instructor);
+    }
+
+
+
+    @Test
+    void testAddInstructorAndAssignMultipleCourses() {
+        Course course1 = new Course();
+        course1.setNumCourse(1L);
+        Course course2 = new Course();
+        course2.setNumCourse(2L);
+
+        when(courseRepository.findById(1L)).thenReturn(Optional.of(course1));
+        when(courseRepository.findById(2L)).thenReturn(Optional.of(course2));
+        when(instructorRepository.save(instructor)).thenReturn(instructor);
+
+        instructorServices.addInstructorAndAssignToCourse(instructor, 1L);
+        instructorServices.addInstructorAndAssignToCourse(instructor, 2L);
+
+        assertEquals(2, instructor.getCourses().size());
+        verify(courseRepository, times(1)).findById(1L);
+        verify(courseRepository, times(1)).findById(2L);
+        verify(instructorRepository, times(2)).save(instructor);
     }
 }
