@@ -32,9 +32,9 @@ public class RegistrationRestController {
     }
 
     @Operation(description = "Assign Registration to Course")
-    @PutMapping("/assignToCourse/{numRegis}/{numSkieur}")
+    @PutMapping("/assignToCourse/{numRegis}/{numCourse}")
     public Registration assignToCourse(@PathVariable("numRegis") Long numRegistration,
-                                       @PathVariable("numSkieur") Long numCourse) {
+                                       @PathVariable("numCourse") Long numCourse) {
         logger.info("Assigning registration ID {} to course ID {}", numRegistration, numCourse);
         Registration result = registrationServices.assignRegistrationToCourse(numRegistration, numCourse);
         logger.info("Registration ID {} assigned to course ID {}", numRegistration, numCourse);
