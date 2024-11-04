@@ -10,7 +10,7 @@ services:
     ports:
       - 3306:3306
     volumes:
-      - db:/var/lib/mysql
+      - dbMySQL:/var/lib/mysql
 
   app:
     depends_on:
@@ -33,4 +33,4 @@ services:
     tty: true
 
 volumes:
-  db :
+  dbMySQL :
