@@ -2,6 +2,13 @@ global:
   scrape_interval: 15s
 
 scrape_configs:
-  - job_name: 'ski'
+  # Scrape configuration for Prometheus itself
+  - job_name: 'prometheus'
     static_configs:
-      - targets: ['192.168.56.3:9090']  # Replace with the actual app IP and port if different.
+      - targets: ['192.168.56.3:9090']  # Adjust IP/port if necessary
+
+  # Scrape configuration for Jenkins
+  - job_name: 'jenkins'
+    metrics_path: '/prometheus'  # Change this if your Jenkins uses a different path
+    static_configs:
+      - targets: ['192.168.56.3:8080']  # Replace with the Jenkins server IP and port
