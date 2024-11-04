@@ -16,15 +16,18 @@ pipeline {
         }
         stage('SonarQube Analysis') {
             steps {
-                sh 'mvn sonar:sonar -Dsonar.projectKey=sonardevops -Dsonar.sources=src/main/java -Dsonar.host.url=http://192.168.1.101:9000 -Dsonar.token=squ_0cde13cc506c9f2f7da5b140a90e8ba33f9289bf '
-            }
-        }
-        stage('Quality Gate') {
-            steps {
-                timeout(time: 15, unit: 'MINUTES') {
-                    waitForQualityGate abortPipeline: true
+                withSonarQubeEnv(installationName: 'sonar') {
+                    sh 'mvn sonar:sonar'
                 }
             }
         }
+        post {
+        failure {
+            echo 'Build failed. Stopping the pipeline.'
+            currentBuild.result = 'FAILURE'
+        }
+        }
+
+
     }
 }
