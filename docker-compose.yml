@@ -2,18 +2,15 @@ version: "3.8"
 
 services:
   mysqldb:
-    image: mysql:5.7
+    image: mysql
     restart: always
     environment:
       - MYSQL_ROOT_PASSWORD=123456
       - MYSQL_DATABASE=stationSki
-      - MYSQL_CHARSET=utf8mb4
-      - MYSQL_COLLATION=utf8mb4_unicode_ci
     ports:
       - 3306:3306
     volumes:
       - db:/var/lib/mysql
-    command: --explicit_defaults_for_timestamp
 
   app:
     depends_on:
