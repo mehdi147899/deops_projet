@@ -22,7 +22,7 @@ pipeline {
 
         stage('SonarQube Analysis') {
             steps {
-                withSonarQubeEnv('sonarqube-server') {
+                withSonarQubeEnv('sonar') {
                     sh 'mvn sonar:sonar -Dsonar.projectKey=gestion-station-ski -Dsonar.sources=src/main/java -Dsonar.host.url=http://192.168.1.101:9000 -Dsonar.login=${SONARQUBE_TOKEN}'
                 }
             }
