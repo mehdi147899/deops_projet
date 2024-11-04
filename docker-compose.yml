@@ -7,22 +7,25 @@ services:
     environment:
       - MYSQL_ROOT_PASSWORD=123456
       - MYSQL_DATABASE=stationSki
+      - MYSQL_CHARSET=utf8mb4
+      - MYSQL_COLLATION=utf8mb4_unicode_ci
     ports:
       - 3306:3306
     volumes:
       - db:/var/lib/mysql
+    command: --explicit_defaults_for_timestamp
 
   app:
     depends_on:
       - mysqldb
-    build: ./
     image: bilelkort/devops:latest
+    build: ./
     restart: always
     ports:
       - 8089:8089
     environment:
       SPRING_APPLICATION_JSON: '{
-        "spring.datasource.url"  : "jdbc:mysql://mysqldb:3306/stationSki?useSSL=false",
+        "spring.datasource.url"  : "jdbc:mysql://mysqldb:3306/stationSki?createDatabaseIfNotExist=true",
         "spring.datasource.username" : "root",
         "spring.datasource.password" : "123456",
         "spring.jpa.properties.hibernate.dialect" : "org.hibernate.dialect.MySQL5InnoDBDialect",
@@ -33,4 +36,4 @@ services:
     tty: true
 
 volumes:
-  db:
+  db :
