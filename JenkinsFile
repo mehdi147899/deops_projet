@@ -1,20 +1,33 @@
 pipeline {
-    agent {label 'linux'}
+    agent any
 
-    options {
-        buildDiscarder(logRotator(numToKeepStr: '5'))
+
+    environment {
+        SONARQUBE_SERVER = 'sonar' // Nom configuré pour SonarQube dans Jenkins
+        SONARQUBE_TOKEN = credentials('sonardevops') // Jeton d'authentification sécurisé
     }
 
-    stages{
-
-        stage('Scan') {
+    stages {
+        stage('Clone repository') {
             steps {
-                withSonarQubeEnv(installationName: 'sonar') {
-                    sh './mvnw clean org.sonarsource.scanner.maven:sonar-maven-plugin:3.9.0.2155:sonar'}
+                git branch: 'BaghouliAmine', url: 'https://github.com/mehdi147899/deops_projet.git'
+            }
+        }
+
+        stage('Build and Test') {
+            steps {
+                sh 'mvn clean install -DskipTests' 
+            }
+        }
+
+        stage('SonarQube Analysis') {
+            steps {
+                withSonarQubeEnv('sonarqube-server') {
+                    sh 'mvn sonar:sonar -Dsonar.projectKey=gestion-station-ski -Dsonar.sources=src/main/java -Dsonar.host.url=http://192.168.1.101:9000 -Dsonar.login=${SONARQUBE_TOKEN}'
                 }
             }
         }
 
         
+    }
 }
-
