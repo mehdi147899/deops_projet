@@ -29,45 +29,70 @@ class InstructorServicesImplTest {
     private InstructorServicesImpl instructorServices;
 
     private Instructor instructor;
+    private Course course;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
         instructor = new Instructor(1L, "John", "Doe", LocalDate.of(2020, 1, 1), new HashSet<>());
+        course = new Course(1L, 1, null, null, 100.0f, 2, null);
     }
 
     @Test
     void testAddInstructor() {
-        when(instructorRepository.save(instructor)).thenReturn(instructor);
+        when(instructorRepository.save(any(Instructor.class))).thenReturn(instructor);
 
         Instructor savedInstructor = instructorServices.addInstructor(instructor);
 
         assertNotNull(savedInstructor);
-        assertEquals(instructor.getFirstName(), savedInstructor.getFirstName());
+        assertEquals("John", savedInstructor.getFirstName());
         verify(instructorRepository, times(1)).save(instructor);
+    }
+
+    @Test
+    void testAddInstructorWithNull() {
+        assertThrows(IllegalArgumentException.class, () -> instructorServices.addInstructor(null));
+        verify(instructorRepository, never()).save(any(Instructor.class));
     }
 
     @Test
     void testRetrieveAllInstructors() {
-        List<Instructor> instructors = Arrays.asList(instructor);
-        when(instructorRepository.findAll()).thenReturn(instructors);
+        when(instructorRepository.findAll()).thenReturn(Collections.singletonList(instructor));
 
-        List<Instructor> retrievedInstructors = instructorServices.retrieveAllInstructors();
+        List<Instructor> instructors = instructorServices.retrieveAllInstructors();
 
-        assertFalse(retrievedInstructors.isEmpty());
-        assertEquals(1, retrievedInstructors.size());
+        assertFalse(instructors.isEmpty());
+        assertEquals(1, instructors.size());
         verify(instructorRepository, times(1)).findAll();
     }
 
     @Test
+    void testRetrieveAllInstructorsEmptyList() {
+        when(instructorRepository.findAll()).thenReturn(Collections.emptyList());
+
+        List<Instructor> instructors = instructorServices.retrieveAllInstructors();
+
+        assertTrue(instructors.isEmpty());
+        verify(instructorRepository, times(1)).findAll();
+    }
+    @Test
     void testUpdateInstructor() {
-        when(instructorRepository.save(instructor)).thenReturn(instructor);
+        when(instructorRepository.existsById(1L)).thenReturn(true);
+        when(instructorRepository.save(any(Instructor.class))).thenReturn(instructor);
 
         Instructor updatedInstructor = instructorServices.updateInstructor(instructor);
 
         assertNotNull(updatedInstructor);
-        assertEquals(instructor.getLastName(), updatedInstructor.getLastName());
+        assertEquals("Doe", updatedInstructor.getLastName());
+        verify(instructorRepository, times(1)).existsById(1L);
         verify(instructorRepository, times(1)).save(instructor);
+    }
+
+
+    @Test
+    void testUpdateInstructorWithNull() {
+        assertThrows(IllegalArgumentException.class, () -> instructorServices.updateInstructor(null));
+        verify(instructorRepository, never()).save(any(Instructor.class));
     }
 
     @Test
@@ -82,22 +107,67 @@ class InstructorServicesImplTest {
     }
 
     @Test
+    void testRetrieveInstructorNotFound() {
+        when(instructorRepository.findById(2L)).thenReturn(Optional.empty());
+
+        Instructor retrievedInstructor = instructorServices.retrieveInstructor(2L);
+
+        assertNull(retrievedInstructor);
+        verify(instructorRepository, times(1)).findById(2L);
+    }
+
+    @Test
     void testAddInstructorAndAssignToCourse() {
-        // Création d'un objet Course avec numCourse
-        Course course = new Course();
-        course.setNumCourse(1L);
-
-        // Simulation du comportement des repositories
         when(courseRepository.findById(1L)).thenReturn(Optional.of(course));
-        when(instructorRepository.save(instructor)).thenReturn(instructor);
+        when(instructorRepository.save(any(Instructor.class))).thenReturn(instructor);
 
-        // Appel du service
-        Instructor savedInstructor = instructorServices.addInstructorAndAssignToCourse(instructor, 1L);
+        Instructor result = instructorServices.addInstructorAndAssignToCourse(instructor, 1L);
 
-        // Vérifications
-        assertNotNull(savedInstructor);
-        assertEquals(1, savedInstructor.getCourses().size());
+        assertNotNull(result);
+        assertEquals(1, result.getCourses().size());
+        assertTrue(result.getCourses().contains(course));
         verify(courseRepository, times(1)).findById(1L);
         verify(instructorRepository, times(1)).save(instructor);
+    }
+
+    @Test
+    void testAddInstructorAndAssignToNonExistentCourse() {
+        // Arrange
+        when(courseRepository.findById(1L)).thenReturn(Optional.empty());
+
+        // Act and Assert
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            instructorServices.addInstructorAndAssignToCourse(instructor, 1L);
+        });
+
+        // Verify
+        assertEquals("Course with the given ID not found", exception.getMessage());
+        verify(courseRepository, times(1)).findById(1L);
+        verify(instructorRepository, never()).save(any(Instructor.class));
+    }
+
+
+    @Test
+    void testAddInstructorAndAssignToCourseWithNullInstructor() {
+        assertThrows(IllegalArgumentException.class, () -> instructorServices.addInstructorAndAssignToCourse(null, 1L));
+        verify(courseRepository, never()).findById(anyLong());
+        verify(instructorRepository, never()).save(any(Instructor.class));
+    }
+
+    @Test
+    void testAddInstructorAndAssignToCourseWithNullCourseId() {
+        assertThrows(IllegalArgumentException.class, () -> instructorServices.addInstructorAndAssignToCourse(instructor, null));
+        verify(courseRepository, never()).findById(anyLong());
+        verify(instructorRepository, never()).save(any(Instructor.class));
+    }
+
+    @Test
+    void testUpdateInstructorNotFound() {
+        Instructor nonExistentInstructor = new Instructor(2L, "Jane", "Smith", LocalDate.of(2021, 1, 1), new HashSet<>());
+
+        when(instructorRepository.findById(2L)).thenReturn(Optional.empty());
+
+        assertThrows(IllegalArgumentException.class, () -> instructorServices.updateInstructor(nonExistentInstructor));
+        verify(instructorRepository, never()).save(nonExistentInstructor);
     }
 }
