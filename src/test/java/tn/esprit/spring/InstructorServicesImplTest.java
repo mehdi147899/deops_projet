@@ -54,6 +54,14 @@ class InstructorServicesImplTest {
         assertThrows(IllegalArgumentException.class, () -> instructorServices.addInstructor(null));
         verify(instructorRepository, never()).save(any(Instructor.class));
     }
+    @Test
+    void testRetrieveInstructorWithNullId() {
+        // Verify that an IllegalArgumentException is thrown when the ID is null
+        assertThrows(IllegalArgumentException.class, () -> instructorServices.retrieveInstructor(null), "Expected IllegalArgumentException when instructor ID is null");
+
+        // Verify that no repository methods are called
+        verify(instructorRepository, never()).findById(anyLong());
+    }
 
     @Test
     void testRetrieveAllInstructors() {
