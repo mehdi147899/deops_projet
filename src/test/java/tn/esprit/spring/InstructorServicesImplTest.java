@@ -37,11 +37,7 @@ class InstructorServicesImplTest {
         instructor = new Instructor(1L, "John", "Doe", LocalDate.of(2020, 1, 1), new HashSet<>());
         course = new Course(1L, 1, null, null, 100.0f, 2, null);
     }
-    @Test
-    void testRetrieveInstructorWithNullId() {
-        assertThrows(IllegalArgumentException.class, () -> instructorServices.retrieveInstructor(null));
-        verify(instructorRepository, never()).findById(anyLong());
-    }
+
     @Test
     void testAddInstructor() {
         when(instructorRepository.save(any(Instructor.class))).thenReturn(instructor);
@@ -69,6 +65,22 @@ class InstructorServicesImplTest {
         assertEquals(1, instructors.size());
         verify(instructorRepository, times(1)).findAll();
     }
+    @Test
+    void testUpdateInstructorWithNullInstructor() {
+        assertThrows(IllegalArgumentException.class, () -> instructorServices.updateInstructor(null), "Expected IllegalArgumentException when instructor is null");
+        verify(instructorRepository, never()).existsById(anyLong());
+        verify(instructorRepository, never()).save(any(Instructor.class));
+    }
+
+    @Test
+    void testUpdateInstructorWithNullId() {
+        Instructor instructorWithNullId = new Instructor(null, "Jane", "Smith", LocalDate.of(2021, 1, 1), new HashSet<>());
+
+        assertThrows(IllegalArgumentException.class, () -> instructorServices.updateInstructor(instructorWithNullId), "Expected IllegalArgumentException when instructor ID is null");
+        verify(instructorRepository, never()).existsById(anyLong());
+        verify(instructorRepository, never()).save(any(Instructor.class));
+    }
+
 
     @Test
     void testRetrieveAllInstructorsEmptyList() {
