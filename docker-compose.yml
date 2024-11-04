@@ -12,7 +12,7 @@ services:
     volumes:
       - db:/var/lib/mysql
 
-  app-ski:
+  app-foyer:
     build:
       context: .
       dockerfile: Dockerfile
@@ -27,34 +27,10 @@ services:
         "spring.datasource.username" : "root",
         "spring.datasource.password" : "mehdi123",
         "spring.jpa.properties.hibernate.dialect" : "org.hibernate.dialect.MySQLDialect",
-        "spring.jpa.hibernate.ddl-auto" : "update",
-        "management.endpoints.web.exposure.include" : "*",
-        "management.endpoint.prometheus.enabled" : "true",
-        "management.metrics.export.prometheus.enabled" : "true"
+        "spring.jpa.hibernate.ddl-auto" : "update"
       }'
     stdin_open: true
     tty: true
-
-  prometheus:
-    image: prom/prometheus:latest
-    container_name: prometheus
-    ports:
-      - "9090:9090"
-    volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml
-    depends_on:
-      - app-ski
-
-  grafana:
-    image: grafana/grafana:latest
-    container_name: grafana
-    ports:
-      - "3000:3000"
-    environment:
-      - GF_SECURITY_ADMIN_USER=admin
-      - GF_SECURITY_ADMIN_PASSWORD=admin
-    depends_on:
-      - prometheus
 
 volumes:
   db:
