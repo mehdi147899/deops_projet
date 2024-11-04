@@ -49,9 +49,13 @@ public class SkierServicesImpl implements ISkierServices {
     public Skier assignSkierToSubscription(Long numSkier, Long numSubscription) {
         Skier skier = skierRepository.findById(numSkier).orElse(null);
         Subscription subscription = subscriptionRepository.findById(numSubscription).orElse(null);
-        skier.setSubscription(subscription);
-        return skierRepository.save(skier);
+        if (skier != null) { // Check if skier is not null
+            skier.setSubscription(subscription);
+            return skierRepository.save(skier);
+        }
+        return null;
     }
+
 
     @Override
     public Skier addSkierAndAssignToCourse(Skier skier, Long numCourse) {
@@ -80,14 +84,17 @@ public class SkierServicesImpl implements ISkierServices {
     public Skier assignSkierToPiste(Long numSkieur, Long numPiste) {
         Skier skier = skierRepository.findById(numSkieur).orElse(null);
         Piste piste = pisteRepository.findById(numPiste).orElse(null);
-        try {
-            skier.getPistes().add(piste);
-        } catch (NullPointerException exception) {
-            Set<Piste> pisteList = new HashSet<>();
-            pisteList.add(piste);
-            skier.setPistes(pisteList);
+        if (skier == null) {
+            // Handle the case where skier is not found (return null or throw an exception)
+            return null;
         }
 
+        // Initialize the pistes set if it is null
+        if (skier.getPistes() == null) {
+            skier.setPistes(new HashSet<>());
+        }
+
+        skier.getPistes().add(piste);
         return skierRepository.save(skier);
     }
 
