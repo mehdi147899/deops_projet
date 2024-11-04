@@ -7,7 +7,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import tn.esprit.spring.entities.Piste;
 import tn.esprit.spring.repositories.IPisteRepository;
-import tn.esprit.spring.services.PisteServicesImpl;
 
 import java.util.Collections;
 import java.util.List;
@@ -68,11 +67,7 @@ class PisteServicesImplTest {
         verify(pisteRepository, times(1)).save(piste);
     }
 
-//    @Test
-//    void testAddPisteWithNull() {
-//        assertThrows(IllegalArgumentException.class, () -> pisteServices.addPiste(null));
-//        verify(pisteRepository, never()).save(any(Piste.class));
-//    }
+
 
     @Test
     void testRetrievePiste() {
@@ -105,9 +100,5 @@ class PisteServicesImplTest {
         verify(pisteRepository, times(1)).deleteById(numPiste);
     }
 
-//    @Test
-//    void testRemovePisteWithNullId() {
-//        assertThrows(IllegalArgumentException.class, () -> pisteServices.removePiste(null));
-//        verify(pisteRepository, never()).deleteById(anyLong());
-//    }
+
 }
