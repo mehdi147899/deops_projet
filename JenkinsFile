@@ -1,43 +1,20 @@
 pipeline {
-    agent any
+    agent {label 'linux'}
 
-    tools {
-        maven 'Maven3' // Assurez-vous que Maven est configuré dans Jenkins
-        jdk 'Java17'   // Assurez-vous que Java est bien configuré
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '5'))
     }
 
-    environment {
-        SONARQUBE_SERVER = 'sonar' // Nom configuré pour SonarQube dans Jenkins
-        SONARQUBE_TOKEN = credentials('sonardevops') // Jeton d'authentification sécurisé
-    }
+    stages{
 
-    stages {
-        stage('Clone repository') {
+        stage('Scan') {
             steps {
-                git branch: 'BaghouliAmine', url: 'https://github.com/mehdi147899/deops_projet.git'
-            }
-        }
-
-        stage('Build and Test') {
-            steps {
-                sh 'mvn clean install -DskipTests' 
-            }
-        }
-
-        stage('SonarQube Analysis') {
-            steps {
-                withSonarQubeEnv('sonar') {
-                    sh 'mvn sonar:sonar -Dsonar.projectKey=mon-projet -Dsonar.sources=src/main/java -Dsonar.host.url=http://192.168.1.101:9000 -Dsonar.login=${SONARQUBE_TOKEN}'
+                withSonarQubeEnv(installationName: 'sonar') {
+                    sh './mvnw clean org.sonarsource.scanner.maven:sonar-maven-plugin:3.9.0.2155:sonar'}
                 }
             }
         }
 
-        stage('Quality Gate') {
-            steps {
-                timeout(time: 2, unit: 'MINUTES') {
-                    waitForQualityGate abortPipeline: true
-                }
-            }
-        }
-    }
+        
 }
+
