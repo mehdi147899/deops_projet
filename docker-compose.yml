@@ -16,6 +16,7 @@ services:
     depends_on:
       - mysqldb
     image: skanderlazreg/gestionstationski:1.0.0
+    build: ./
     restart: on-failure
     ports:
       - 8089:8089

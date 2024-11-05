@@ -19,6 +19,12 @@
                 }
             }
 
+            stage('Build and Package') {
+                steps {
+                    sh 'mvn clean package -DskipTests'
+                }
+            }
+
             stage('Run Unit Tests') {
                 steps {
                     echo 'Running unit tests...'
