@@ -47,7 +47,7 @@
             stage('Docker Image') {
                 steps {
                     script {
-                        dockerImage = docker.build "skanderlazreg/gestionstationski:1.0.0"
+                        dockerImage = docker.build -t "skanderlazreg/gestionstationski:1.0.0"
                     }
                 }
             }
