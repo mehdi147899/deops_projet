@@ -19,17 +19,24 @@
                 }
             }
 
+            stage('Run Unit Tests') {
+                steps {
+                    echo 'Running unit tests...'
+                    sh 'mvn test'
+                }
+            }
+
             stage('SonarQube Analysis') {
                 steps {
                     sh 'mvn sonar:sonar -Dsonar.projectKey=jenkins -Dsonar.sources=src/main/java -Dsonar.host.url=http://192.168.1.100:9000 -Dsonar.token=sqa_2b3d94d205010f6ac883b8699dd1c75c33d85936'
                 }
             }
 
-            /*stage('Deploy to Nexus') {
+            stage('Deploy to Nexus') {
                 steps {
                     sh 'mvn deploy -DskipTests=true'
                 }
-            }*/
+            }
 
             stage('Docker Image') {
                 steps {
