@@ -26,6 +26,13 @@ pipeline {
             }
         }
 
+        stage('Package') {
+            steps {
+                // Package your application
+                sh 'mvn package'
+            }
+        }
+
         stage('Run Unit Tests') {
             steps {
                 sh 'mvn test' // Exécute les tests unitaires avec Mockito et JUnit
