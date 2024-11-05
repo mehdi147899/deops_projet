@@ -24,7 +24,7 @@ pipeline {
                         -Dsonar.projectKey=ski_station_project \
                         -Dsonar.sources=src \
                         -Dsonar.java.binaries=target/classes \
-                        -Dsonar.host.url=http://localhost:9000 \
+                        -Dsonar.host.url=http://192.168.33.10:9000 \
                         -Dsonar.login=squ_3c84ba8b6ecaeef2cb775ae5967ee1a48bbbf477"
                 }
             }
