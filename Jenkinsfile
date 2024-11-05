@@ -5,7 +5,7 @@ pipeline {
         stage('Clone Repository') {
             steps {
                 // Clone the repository
-                git 'https://your-git-repo-url.git' // Replace with your actual repository URL
+                git 'https://github.com/mehdi147899/deops_projet.gi'
             }
         }
         
