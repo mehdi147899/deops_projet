@@ -15,6 +15,25 @@ pipeline {
             }
         }
 
+         stage('Build and Test') {
+                        steps {
+                            sh 'mvn install -DskipTests'
+                        }
+                    }
+
+          stage('Build and Package') {
+                         steps {
+                             sh 'mvn clean package -DskipTests'
+                         }
+                     }
+
+                     stage('Run Unit Tests') {
+                         steps {
+                             echo 'Running unit tests...'
+                             sh 'mvn test'
+                         }
+                     }
+
         stage('MVN build') {
                         steps {
                             echo 'MVN ...'
