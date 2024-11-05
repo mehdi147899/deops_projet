@@ -8,6 +8,25 @@ pipeline {
     }
 
     stages {
+        stage('Prepare Environment') {
+            steps {
+                script {
+                    // Optional: Ensure Maven has a settings.xml configured with a central mirror for reliable dependency downloads
+                    writeFile file: '/root/.m2/settings.xml', text: '''
+                    <settings>
+                        <mirrors>
+                            <mirror>
+                                <id>central-mirror</id>
+                                <url>https://repo1.maven.org/maven2/</url>
+                                <mirrorOf>central</mirrorOf>
+                            </mirror>
+                        </mirrors>
+                    </settings>
+                    '''
+                }
+            }
+        }
+
         stage('Build') {
             steps {
                 script {
@@ -55,7 +74,7 @@ pipeline {
                     // Retry loop to check the application health endpoint
                     sh '''
                     for i in {1..5}; do
-                        curl http://192.168.33.10:8089/api/skier/all && break || sleep 5
+                        curl http://192.168.33.10:8089/api/skier/all && break || sleep 10
                     done
                     '''
                 }
@@ -67,7 +86,8 @@ pipeline {
                 script {
                     // Publish the artifact to Nexus repository
                     withCredentials([usernamePassword(credentialsId: "${NEXUS_CREDENTIALS_ID}", usernameVariable: 'NEXUS_USERNAME', passwordVariable: 'NEXUS_PASSWORD')]) {
-                        sh "mvn deploy:deploy-file \
+                        sh '''
+                        mvn deploy:deploy-file \
                             -DgroupId=com.example \
                             -DartifactId=ski-station-app \
                             -Dversion=1.0.0 \
@@ -76,7 +96,8 @@ pipeline {
                             -DrepositoryId=nexus \
                             -Durl=${NEXUS_URL} \
                             -Dnexus.username=$NEXUS_USERNAME \
-                            -Dnexus.password=$NEXUS_PASSWORD"
+                            -Dnexus.password=$NEXUS_PASSWORD
+                        '''
                     }
                 }
             }
