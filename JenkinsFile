@@ -53,7 +53,7 @@ pipeline {
                     sh "mvn deploy -DaltDeploymentRepository=nexus::default::${NEXUS_REPO} -Dnexus.username=${NEXUS_USER} -Dnexus.password=${NEXUS_PASS}"
                 }
             }
-        } */
+        } 
 
         stage('Build Docker Image') {
             steps {
@@ -88,7 +88,7 @@ pipeline {
                 }
             }
         }
-    }
+    }   */
 
     post {
         always {
