@@ -95,8 +95,6 @@ pipeline {
         always {
             echo 'Pipeline terminé.'
         }
-        cleanup {
-            sh 'docker-compose down'
-        }
+        
     }
 }
