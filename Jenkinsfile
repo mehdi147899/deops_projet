@@ -5,6 +5,7 @@ pipeline {
         SONAR_SCANNER_HOME = tool 'SonarScanner'  // Ensure this matches the name configured in Jenkins
         NEXUS_URL = 'http://192.168.33.10:8081/repository/maven-releases-abder/'  // Updated Nexus repository URL
         NEXUS_CREDENTIALS_ID = 'nexus-creds'  // ID for Nexus credentials added in Jenkins
+        DOCKER_HUB_REPO = 'your_dockerhub_username/abderrahimallaniskier'  // Docker Hub repository
     }
 
     stages {
@@ -40,6 +41,19 @@ pipeline {
             }
         }
         
+        stage('Push Docker Image to Docker Hub') {
+            steps {
+                script {
+                    // Login to Docker Hub and push the image
+                    withCredentials([usernamePassword(credentialsId: 'docker-hub-creds', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+                        sh "docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD"
+                        sh "docker tag abderrahimallaniskier ${DOCKER_HUB_REPO}:latest"
+                        sh "docker push ${DOCKER_HUB_REPO}:latest"
+                    }
+                }
+            }
+        }
+        
         stage('Start Services with Docker Compose') {
             steps {
                 script {
@@ -67,7 +81,8 @@ pipeline {
                 script {
                     // Publish the artifact to Nexus repository
                     withCredentials([usernamePassword(credentialsId: "${NEXUS_CREDENTIALS_ID}", usernameVariable: 'NEXUS_USERNAME', passwordVariable: 'NEXUS_PASSWORD')]) {
-                        sh "mvn deploy:deploy-file \
+                        sh '''
+                        mvn deploy:deploy-file \
                             -DgroupId=com.example \
                             -DartifactId=ski-station-app \
                             -Dversion=1.0.0 \
@@ -76,7 +91,8 @@ pipeline {
                             -DrepositoryId=nexus \
                             -Durl=${NEXUS_URL} \
                             -Dnexus.username=$NEXUS_USERNAME \
-                            -Dnexus.password=$NEXUS_PASSWORD"
+                            -Dnexus.password=$NEXUS_PASSWORD
+                        '''
                     }
                 }
             }
