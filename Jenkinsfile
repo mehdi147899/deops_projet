@@ -12,6 +12,8 @@ pipeline {
             steps {
                 script {
                     // Run Maven build
+                    // Clear the local Maven cache for dependencies
+                    sh 'mvn dependency:purge-local-repository -DreResolve=true'
                     sh 'mvn clean package -DskipTests'
                 }
             }
