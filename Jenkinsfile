@@ -52,7 +52,7 @@ pipeline {
             steps {
                 script {
                     // Run tests or health checks
-                    sh 'curl http://localhost:8089/api/skier/all'
+                    sh 'curl http://192.168.33.10:8089/api/skier/all'
                 }
             }
         }
