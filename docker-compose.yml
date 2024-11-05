@@ -1,8 +1,10 @@
+version: '3.8'
+
 services:
   app:
     build:
       context: .
-      dockerfile: Dockerfile  # Dockerfile for your Spring Boot application
+      dockerfile: Dockerfile
     ports:
       - "8089:8089"
     depends_on:
@@ -14,7 +16,7 @@ services:
 
   db:
     build:
-      context: ./mysql_db  # Directory where the MySQL Dockerfile is located
+      context: ./mysql_db
     environment:
       MYSQL_ROOT_PASSWORD: Root@1234
       MYSQL_DATABASE: stationSki
@@ -22,6 +24,22 @@ services:
       - "3307:3306"
     volumes:
       - db_data:/var/lib/mysql
+
+  prometheus:
+    image: prom/prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+
+  grafana:
+    image: grafana/grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin  # Set an admin password here
+    depends_on:
+      - prometheus
 
 volumes:
   db_data:
