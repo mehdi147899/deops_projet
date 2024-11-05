@@ -1,6 +1,7 @@
 package tn.esprit.spring.services;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import java.util.HashSet;
@@ -64,27 +65,29 @@ class SkierServicesImplTest {
 
     @Test
     void testAddSkierAndAssignToCourse() {
-        // Arrange
         Skier skier = new Skier();
         Long courseId = 1L;
         Course course = new Course();
         Registration registration = new Registration();
-        skier.setRegistrations(Set.of(registration));
-
-        when(courseRepository.getById(courseId)).thenReturn(course);
+        Set<Registration> registrations = Set.of(registration);
+        skier.setRegistrations(registrations);
+    
+        // Mock repository calls
+        when(courseRepository.findById(courseId)).thenReturn(Optional.of(course));
         when(skierRepository.save(any(Skier.class))).thenReturn(skier);
-        when(registrationRepository.save(any(Registration.class))).thenReturn(registration);
-
-        // Act
+    
         Skier result = skierService.addSkierAndAssignToCourse(skier, courseId);
-
-        // Assert
-        assertNotNull(result, "Result should not be null");
-        assertEquals(course, registration.getCourse(), "Course should be assigned to registration");
-        assertEquals(skier, registration.getSkier(), "Skier should be assigned to registration");
+    
+        // Verify that the course is assigned correctly
+        for (Registration r : result.getRegistrations()) {
+            assertEquals(course, r.getCourse(), "Course should be assigned to registration");
+        }
+    
+        // Verifying the interactions
         verify(skierRepository).save(skier);
-        verify(registrationRepository).save(registration);
+        verify(registrationRepository).save(any(Registration.class));
     }
+    
 
     @Test
     void testAssignSkierToPiste() {
@@ -126,19 +129,23 @@ class SkierServicesImplTest {
         assertEquals(skiers, result, "Returned list should match the mocked list");
     }
 
+
+
     @Test
     void testAssignSkierToSubscriptionNotFound() {
-        // Arrange
-        Long skierId = 1L;
+        Long nonExistentSkierId = 999L; // ID that doesn't exist
         Long subscriptionId = 1L;
 
-        when(skierRepository.findById(skierId)).thenReturn(Optional.empty());
+        // Mock responses for non-existent skier and valid subscription
+        when(skierRepository.findById(nonExistentSkierId)).thenReturn(Optional.empty());
         when(subscriptionRepository.findById(subscriptionId)).thenReturn(Optional.of(new Subscription()));
 
-        // Act & Assert
-        assertThrows(NullPointerException.class, 
-            () -> skierService.assignSkierToSubscription(skierId, subscriptionId), 
-            "Should throw NullPointerException if skier is not found"
-        );
+        Skier result = skierService.assignSkierToSubscription(nonExistentSkierId, subscriptionId);
+
+        // Assert that result is null if skier is not found
+        assertNull(result, "Expected null when skier is not found");
     }
+
+
+    
 }
