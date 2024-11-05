@@ -6,7 +6,7 @@ services:
       context: .
       dockerfile: Dockerfile  # Dockerfile for your Spring Boot application
     ports:
-      - "8090:8089"
+      - "8089:8089"
     depends_on:
       - db
     environment:
