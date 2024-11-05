@@ -3,7 +3,7 @@ pipeline {
     
     environment {
         SONAR_SCANNER_HOME = tool 'SonarScanner'  // Ensure this matches the name configured in Jenkins
-        NEXUS_URL = 'http://localhost:8081/repository/maven-releases-abder/'  // Nexus repository URL
+        NEXUS_URL = 'http://192.168.33.10:8081/repository/maven-releases-abder/'  // Updated Nexus repository URL
         NEXUS_CREDENTIALS_ID = 'nexus-creds'  // ID for Nexus credentials added in Jenkins
     }
 
@@ -25,7 +25,7 @@ pipeline {
                         -Dsonar.sources=src \
                         -Dsonar.java.binaries=target/classes \
                         -Dsonar.host.url=http://localhost:9000 \
-                        -Dsonar.login=squ_89b1c545e04fe6e31dcd1d0853907159ea2bf8ae"
+                        -Dsonar.login=squ_3c84ba8b6ecaeef2cb775ae5967ee1a48bbbf477"
                 }
             }
         }
@@ -61,14 +61,18 @@ pipeline {
             steps {
                 script {
                     // Publish the artifact to Nexus repository
-                    sh "mvn deploy:deploy-file \
-                        -DgroupId=com.example \
-                        -DartifactId=ski-station-app \
-                        -Dversion=1.0.0 \
-                        -Dpackaging=jar \
-                        -Dfile=target/ski-station-app-1.0.0.jar \
-                        -DrepositoryId=${NEXUS_CREDENTIALS_ID} \
-                        -Durl=${NEXUS_URL}"
+                    withCredentials([usernamePassword(credentialsId: "${NEXUS_CREDENTIALS_ID}", usernameVariable: 'NEXUS_USERNAME', passwordVariable: 'NEXUS_PASSWORD')]) {
+                        sh "mvn deploy:deploy-file \
+                            -DgroupId=com.example \
+                            -DartifactId=ski-station-app \
+                            -Dversion=1.0.0 \
+                            -Dpackaging=jar \
+                            -Dfile=target/ski-station-app-1.0.0.jar \
+                            -DrepositoryId=nexus \
+                            -Durl=${NEXUS_URL} \
+                            -Dnexus.username=$NEXUS_USERNAME \
+                            -Dnexus.password=$NEXUS_PASSWORD"
+                    }
                 }
             }
         }
