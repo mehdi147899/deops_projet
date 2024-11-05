@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile  # Dockerfile for your Spring Boot application
+    ports:
+      - "8090:8089"
+    depends_on:
+      - db
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/stationSki?createDatabaseIfNotExist=true
+      SPRING_DATASOURCE_USERNAME: docker_user
+      SPRING_DATASOURCE_PASSWORD: Docker@1234!
+
+  db:
+    build:
+      context: ./mysql_db  # Directory where the MySQL Dockerfile is located
+    environment:
+      MYSQL_ROOT_PASSWORD: Root@1234
+      MYSQL_DATABASE: stationSki
+    ports:
+      - "3307:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+
+volumes:
+  db_data:

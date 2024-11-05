@@ -14,18 +14,37 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    // Build Docker image
+                    // Build Docker image for the application
                     sh 'docker build -t abderrahimallaniskier .'
                 }
             }
         }
         
-        stage('Run Docker Container') {
+        stage('Start Services with Docker Compose') {
             steps {
                 script {
-                    // Run Docker container
-                    sh 'docker run -d -p 8089:8089 abderrahimallaniskier'
+                    // Start app and db services in detached mode
+                    sh 'docker-compose up -d'
                 }
+            }
+        }
+        
+        stage('Run Tests') {
+            steps {
+                script {
+                    // Run tests or health checks here
+                    // Replace with your test commands as needed
+                    sh 'curl http://localhost:8089/api/skier/all'
+                }
+            }
+        }
+    }
+    
+    post {
+        always {
+            script {
+                // Stop and remove containers after the pipeline completes
+                sh 'docker-compose down'
             }
         }
     }
