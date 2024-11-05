@@ -2,13 +2,6 @@ pipeline {
     agent any
     
     stages {
-        stage('Clone Repository') {
-            steps {
-                // Clone the repository
-                git 'https://github.com/mehdi147899/deops_projet.git'
-            }
-        }
-        
         stage('Build') {
             steps {
                 script {
