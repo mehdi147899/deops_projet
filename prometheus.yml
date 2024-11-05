@@ -12,3 +12,8 @@ scrape_configs:
     metrics_path: '/prometheus'  # Change this if your Jenkins uses a different path
     static_configs:
       - targets: ['192.168.56.3:8080']  # Replace with the Jenkins server IP and port
+  # Scrape configuration for your Spring Boot application
+  - job_name: 'app-ski'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['192.168.56.3:8089']
