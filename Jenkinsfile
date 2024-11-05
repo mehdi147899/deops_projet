@@ -17,12 +17,13 @@ pipeline {
         
         stage('SonarQube Analysis') {
             steps {
-                withSonarQubeEnv('SonarQube') {  // Matches the server name you configured
+                withSonarQubeEnv('SonarQube') {  // Matches the SonarQube server name configured in Jenkins
                     sh "${SONAR_SCANNER_HOME}/bin/sonar-scanner \
                         -Dsonar.projectKey=ski_station_project \
                         -Dsonar.sources=src \
                         -Dsonar.java.binaries=target/classes \
-                        -Dsonar.host.url=http://localhost:9000"
+                        -Dsonar.host.url=http://localhost:9000 \
+                        -Dsonar.login=squ_89b1c545e04fe6e31dcd1d0853907159ea2bf8ae"
                 }
             }
         }
@@ -48,7 +49,7 @@ pipeline {
         stage('Run Tests') {
             steps {
                 script {
-                    // Run tests or health checks here
+                    // Run tests or health checks
                     sh 'curl http://localhost:8089/api/skier/all'
                 }
             }
