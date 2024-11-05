@@ -1,12 +1,29 @@
 pipeline {
     agent any
     
+    environment {
+        SONAR_SCANNER_HOME = tool 'SonarScanner'  // Ensure this matches the name configured in Jenkins
+    }
+
     stages {
         stage('Build') {
             steps {
                 script {
                     // Run Maven build
                     sh 'mvn clean package -DskipTests'
+                }
+            }
+        }
+        
+        stage('SonarQube Analysis') {
+            steps {
+                withSonarQubeEnv('SonarQube') {  
+                    sh "${SONAR_SCANNER_HOME}/bin/sonar-scanner \
+                        -Dsonar.projectKey=your_project_key \
+                        -Dsonar.sources=src \
+                        -Dsonar.java.binaries=target/classes \
+                        -Dsonar.host.url=http://localhost:9000 \
+                        -Dsonar.login=<your-sonarqube-token>"
                 }
             }
         }
@@ -33,7 +50,6 @@ pipeline {
             steps {
                 script {
                     // Run tests or health checks here
-                    // Replace with your test commands as needed
                     sh 'curl http://localhost:8089/api/skier/all'
                 }
             }
