@@ -3,6 +3,8 @@ pipeline {
     
     environment {
         SONAR_SCANNER_HOME = tool 'SonarScanner'  // Ensure this matches the name configured in Jenkins
+        NEXUS_URL = 'http://localhost:8081/repository/maven-releases-abder/'  // Nexus repository URL
+        NEXUS_CREDENTIALS_ID = 'nexus-creds'  // ID for Nexus credentials added in Jenkins
     }
 
     stages {
@@ -51,6 +53,22 @@ pipeline {
                 script {
                     // Run tests or health checks
                     sh 'curl http://localhost:8089/api/skier/all'
+                }
+            }
+        }
+        
+        stage('Publish to Nexus') {
+            steps {
+                script {
+                    // Publish the artifact to Nexus repository
+                    sh "mvn deploy:deploy-file \
+                        -DgroupId=com.example \
+                        -DartifactId=ski-station-app \
+                        -Dversion=1.0.0 \
+                        -Dpackaging=jar \
+                        -Dfile=target/ski-station-app-1.0.0.jar \
+                        -DrepositoryId=${NEXUS_CREDENTIALS_ID} \
+                        -Durl=${NEXUS_URL}"
                 }
             }
         }
