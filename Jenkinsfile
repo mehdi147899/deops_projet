@@ -11,10 +11,9 @@ pipeline {
         stage('Build') {
             steps {
                 script {
-                    // Run Maven build
-                    // Clear the local Maven cache for dependencies
+                    // Clear the local Maven cache for dependencies and run Maven build
                     sh 'mvn dependency:purge-local-repository -DreResolve=true'
-                    sh 'mvn clean package -DskipTests'
+                    sh 'mvn clean package -DskipTests -U'
                 }
             }
         }
@@ -53,8 +52,12 @@ pipeline {
         stage('Run Tests') {
             steps {
                 script {
-                    // Run tests or health checks
-                    sh 'curl http://192.168.33.10:8089/api/skier/all'
+                    // Retry loop to check the application health endpoint
+                    sh '''
+                    for i in {1..5}; do
+                        curl http://192.168.33.10:8089/api/skier/all && break || sleep 5
+                    done
+                    '''
                 }
             }
         }
