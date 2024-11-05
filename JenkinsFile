@@ -6,9 +6,11 @@ pipeline {
         SONARQUBE_TOKEN = credentials('sonardevops') // Jeton d'authentification sécurisé
        // NEXUS_CREDENTIALS_ID = 'nexus'
         DOCKER_CREDENTIALS_ID = 'docker'
-        DOCKER_IMAGE = "aminebaghouli/gestion-station-ski:1.0.0"
+        DOCKER_IMAGE = "aminebaghouli/gestion-station-ski"
         DOCKER_TAG = "latest"
         NEXUS_REPO = "https://192.168.1.101:8082/repository/NexusRepository"
+        APP_VERSION = '1.0.0'
+        DOCKER_TAG = '1.0.0'
     }
 
     stages {
