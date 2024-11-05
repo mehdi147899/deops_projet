@@ -28,14 +28,13 @@ pipeline {
             }
         }
 
+        /*
         stage('Deploy to Nexus') {
             steps {
-                script {
 
-                            sh "mvn deploy -DskipTests -s ${MAVEN_SETTINGS} -DaltDeploymentRepository=deploymentRepo::default::http://192.168.1.101:8082/repository/NexusRepository/"
-                        }  
+               sh 'mvn deploy' 
             }
-        }
+        }  */
 
         
     }

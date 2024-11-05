@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  mysqldb:
+    image: mysql:5.7
+    restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD=12345
+      - MYSQL_DATABASE=stationSki
+    ports:
+      - 3306:3306
+    volumes:
+      - db:/var/lib/mysql
+
+  app-timesheet:
+    depends_on:
+      - mysqldb
+    image: BaghouliAmine/gestionstationski:1.0.0
+    build: ./
+    restart: on-failure
+    ports:
+      - 8089:8089
+    
+   
+
+volumes:
+  db:
