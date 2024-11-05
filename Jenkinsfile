@@ -19,7 +19,7 @@ pipeline {
             steps {
                 withSonarQubeEnv('SonarQube') {  // Matches the server name you configured
                     sh "${SONAR_SCANNER_HOME}/bin/sonar-scanner \
-                        -Dsonar.projectKey=your_project_key \
+                        -Dsonar.projectKey=ski_station_project \
                         -Dsonar.sources=src \
                         -Dsonar.java.binaries=target/classes \
                         -Dsonar.host.url=http://localhost:9000"
