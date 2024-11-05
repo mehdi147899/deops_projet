@@ -68,7 +68,7 @@ pipeline {
         stage('Deploy with Docker Compose') {
             steps {
                 script {
-                    sh 'docker-compose up -d'
+                    sh 'docker compose up -d'
                 }
             }
         }
@@ -77,7 +77,7 @@ pipeline {
             steps {
                 script {
                     // Démarrer un outil de monitoring comme Grafana et Prometheus
-                    sh 'docker-compose -f monitoring-compose.yml up -d'
+                    sh 'docker compose -f monitoring-compose.yml up -d'
                 }
             }
         }
